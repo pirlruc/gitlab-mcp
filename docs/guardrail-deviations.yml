@@ -5,4 +5,23 @@
 #
 # Being stricter than the org default is always allowed and needs no entry here.
 
-deviations: []
+deviations:
+  - id: DOCKER-SEC-003
+    why: >-
+      Repository is private on a non–Enterprise Cloud plan. Cosign keyless
+      signing would write the private repo name and workflow path into the
+      public Rekor transparency log. Signing is deferred until the repository
+      is public (publish workflow sets sign from repository.visibility).
+    epic: GLMCP-009
+    owner: Nuno Monteiro
+    approved_by: Engineering Lead
+    review: 2026-12-31
+  - id: DOCKER-SEC-004
+    why: >-
+      GitHub artifact attestations require Enterprise Cloud for private
+      repositories. SLSA provenance is gated on the same sign input as
+      DOCKER-SEC-003 and activates when the repository becomes public.
+    epic: GLMCP-009
+    owner: Nuno Monteiro
+    approved_by: Engineering Lead
+    review: 2026-12-31

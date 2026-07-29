@@ -26,17 +26,34 @@ org = yaml.safe_load((root / "docs/guardrails/python/profile.thresholds.yml").re
 with (root / "pyproject.toml").open("rb") as handle:
     repo = tomllib.load(handle)["tool"]["gitlab_mcp"]["quality"]
 
-pairs = [
+# Coverage / doc: repo must be >= org floor (higher is stricter).
+# Complexity max / avg max: repo must be <= org floor (lower is stricter).
+# MI min / avg min: repo must be >= org floor (higher is stricter).
+ge_pairs = [
     ("statement_coverage", "statement_coverage"),
     ("branch_coverage", "branch_coverage"),
     ("doc_coverage", "doc_coverage"),
+    ("min_maintainability_index", "maintainability_min"),
+    ("avg_maintainability_index", "maintainability_avg_min"),
 ]
-for org_key, repo_key in pairs:
+le_pairs = [
+    ("max_cyclomatic_complexity", "cyclomatic_max"),
+    ("avg_cyclomatic_complexity", "cyclomatic_avg_max"),
+]
+for org_key, repo_key in ge_pairs:
     org_val = float(org[org_key])
     repo_val = float(repo[repo_key])
     if repo_val < org_val:
         raise SystemExit(
             f"Repo {repo_key}={repo_val} is below org floor {org_key}={org_val}"
+        )
+    print(f"{repo_key}={repo_val}")
+for org_key, repo_key in le_pairs:
+    org_val = float(org[org_key])
+    repo_val = float(repo[repo_key])
+    if repo_val > org_val:
+        raise SystemExit(
+            f"Repo {repo_key}={repo_val} is looser than org floor {org_key}={org_val}"
         )
     print(f"{repo_key}={repo_val}")
 PY

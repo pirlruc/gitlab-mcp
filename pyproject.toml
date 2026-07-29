@@ -69,11 +69,11 @@ omit = ["tests/*"]
 source = ["src/gitlab_mcp"]
 
 [tool.gitlab_mcp.quality]
-# Repo-specific baselines (stricter than or equal to org defaults). See docs/guardrails-note.md.
+# Repo gates must be >= org floors in docs/guardrails/python/profile.thresholds.yml.
 cyclomatic_avg_max = 5
 cyclomatic_max = 8
 doc_coverage = 95
-maintainability_avg_min = 50
+maintainability_avg_min = 60
 maintainability_min = 40
 statement_coverage = 95
 branch_coverage = 95

@@ -51,10 +51,10 @@ See [docs/configuration.md](docs/configuration.md) and [docs/tools.md](docs/tool
 
 ## Quality gates
 
-Stricter than the org Python profile (no deviations recorded):
+Org floors from [`docs/guardrails/python/profile.thresholds.yml`](https://github.com/pirlruc/guardrails/blob/main/python/profile.thresholds.yml):
 
 - Cyclomatic complexity: max ≤ 8, average ≤ 5
-- Maintainability index: min ≥ 40, average ≥ 50
+- Maintainability index: min ≥ 40, average ≥ 60
 - Statement and branch coverage ≥ 95%
 - Documentation coverage ≥ 95% (Google docstring style)
 
@@ -62,6 +62,10 @@ Stricter than the org Python profile (no deviations recorded):
 bash scripts/check-ci-local.sh
 ```
 
+## Container image
+
+See [docs/docker.md](docs/docker.md). Build locally with `docker buildx build --load -t gitlab-mcp:local .`.
+Published images: `ghcr.io/pirlruc/gitlab-mcp` and (when configured) `pirlruc/gitlab-mcp` on Docker Hub.
 ## Releases (local Commitizen)
 
 1. `uv sync --frozen --extra dev`

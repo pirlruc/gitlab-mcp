@@ -67,12 +67,12 @@ milestones:
           goal: >-
             scripts/quality_gates.py plus pyproject thresholds; deviations stay empty.
         architecture:
-          target: scripts/quality_gates.py and docs/guardrails-note.md
+          target: scripts/quality_gates.py and docs/guardrails/python/profile.thresholds.yml
           modules:
             - scripts/quality_gates.py
             - pyproject.toml
         acceptance_criteria:
-          - CC max<=8 avg<=5 and MI min>=40 avg>=50 enforced
+          - CC max<=8 avg<=5 and MI min>=40 avg>=60 enforced
           - Coverage and interrogate fail-under 95
         guardrail_refs:
           - PY-TEST-002
@@ -265,3 +265,99 @@ milestones:
               - test -f docs/ai-agent-handoff.md
             guardrail_refs:
               - PY-DOC-001
+
+  - name: Phase 4 — Container image
+    epics:
+      - id: GLMCP-009
+        status: open
+        title: Production Docker image and multi-registry publish
+        overview:
+          problem: >-
+            Operators need a hardened OCI image for the stdio MCP server on
+            GHCR and Docker Hub, with scan gates from containerdevops.
+          goal: >-
+            Digest-pinned multi-stage Dockerfile, structure tests, thin CI
+            caller, release publish; signing deferred with recorded deviations.
+        architecture:
+          target: Dockerfile and .github/workflows/container.yml
+          modules:
+            - Dockerfile
+            - container-structure-test.yml
+            - docs/docker.md
+            - .github/workflows/release.yml
+        acceptance_criteria:
+          - Non-root UID 65532; no HEALTHCHECK documented for stdio
+          - DOCKER-SEC-003 and DOCKER-SEC-004 recorded in guardrail-deviations.yml
+          - Publish pushes same digest to GHCR and Docker Hub when credentials set
+        guardrail_refs:
+          - DOCKER-BUILD-001
+          - DOCKER-BUILD-003
+          - DOCKER-RUN-001
+          - DOCKER-RUN-006
+          - DOCKER-SEC-003
+          - DOCKER-SEC-004
+          - DOCKER-DELIV-001
+        tasks:
+          - id: GLMCP-009-T1
+            status: open
+            title: Author Dockerfile structure-test and docker docs
+            instructions:
+              files:
+                - Dockerfile
+                - container-structure-test.yml
+                - docs/docker.md
+            verification:
+              - docker buildx build --load -t gitlab-mcp:local .
+            guardrail_refs:
+              - DOCKER-BUILD-003
+          - id: GLMCP-009-T2
+            status: open
+            title: Wire containerdevops callers and release publish
+            instructions:
+              files:
+                - .github/workflows/container.yml
+                - .github/workflows/release.yml
+                - docs/guardrail-deviations.yml
+            verification:
+              - test -f .github/workflows/container.yml
+            guardrail_refs:
+              - DOCKER-DELIV-001
+
+      - id: GLMCP-010
+        status: open
+        title: Align with org Python floors and drop guardrails-note
+        overview:
+          problem: >-
+            Thresholds and toolchain now live org-wide; repo-local note and
+            radon-complexity rule duplicated stale numbers (MI avg 50).
+          goal: >-
+            MI avg 60, org-floor checks for CC/MI keys, python-quality-gates
+            Cursor rule, bump guardrails submodule after python/docker packs merge.
+        architecture:
+          target: pyproject.toml and scripts/check-ci-local.sh
+          modules:
+            - pyproject.toml
+            - scripts/check-ci-local.sh
+            - .cursor/rules/python-quality-gates.mdc
+        acceptance_criteria:
+          - docs/guardrails-note.md and radon-complexity.mdc removed
+          - maintainability_avg_min is 60
+          - check-ci-local compares all complexity keys to org floors
+        guardrail_refs:
+          - PY-CPLX-001
+          - PY-CPLX-002
+          - PY-TEST-002
+          - PY-DOC-001
+        tasks:
+          - id: GLMCP-010-T1
+            status: open
+            title: Raise MI avg and extend local floor checks
+            instructions:
+              files:
+                - pyproject.toml
+                - scripts/check-ci-local.sh
+                - tests/test_quality_gates.py
+            verification:
+              - bash scripts/check-ci-local.sh
+            guardrail_refs:
+              - PY-CPLX-002

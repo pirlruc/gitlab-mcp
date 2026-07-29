@@ -1,0 +1,41 @@
+---
+# Thin caller — pin updated after pirlruc/containerdevops first push lands.
+# Pinned to containerdevops@9bab53c.
+name: Container
+
+on:
+  workflow_dispatch:
+    inputs:
+      blocking:
+        description: Fail the job on gate errors
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  lint:
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@9bab53c8859ff03e5d4f5df0d7cf2bce049ea3c4
+    with:
+      dockerfile: Dockerfile
+      blocking: ${{ inputs.blocking }}
+
+  build:
+    needs: lint
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@9bab53c8859ff03e5d4f5df0d7cf2bce049ea3c4
+    with:
+      context: .
+      dockerfile: Dockerfile
+      image_name: gitlab-mcp:ci
+      structure_test_config: container-structure-test.yml
+      blocking: ${{ inputs.blocking }}
+
+  scan:
+    needs: build
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9bab53c8859ff03e5d4f5df0d7cf2bce049ea3c4
+    with:
+      image: gitlab-mcp:ci
+      image_artifact: container-image
+      blocking: ${{ inputs.blocking }}

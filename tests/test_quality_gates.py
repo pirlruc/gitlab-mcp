@@ -38,7 +38,7 @@ def test_evaluate_passes(tmp_path: Path) -> None:
         "cyclomatic_max": 8.0,
         "cyclomatic_avg_max": 5.0,
         "maintainability_min": 40.0,
-        "maintainability_avg_min": 50.0,
+        "maintainability_avg_min": 60.0,
     }
     failures = qg.evaluate(
         [("a.py:f", 2.0), ("a.py:g", 3.0)],
@@ -54,7 +54,7 @@ def test_evaluate_fails_on_max_cc() -> None:
         "cyclomatic_max": 8.0,
         "cyclomatic_avg_max": 5.0,
         "maintainability_min": 40.0,
-        "maintainability_avg_min": 50.0,
+        "maintainability_avg_min": 60.0,
     }
     failures = qg.evaluate(
         [("a.py:f", 9.0)],
@@ -82,7 +82,7 @@ def test_main_with_artifacts(
             "cyclomatic_max": 8.0,
             "cyclomatic_avg_max": 5.0,
             "maintainability_min": 40.0,
-            "maintainability_avg_min": 50.0,
+            "maintainability_avg_min": 60.0,
         }
 
     monkeypatch.setattr(qg, "load_thresholds", _thresholds)

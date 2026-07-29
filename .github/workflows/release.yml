@@ -7,6 +7,9 @@ on:
     tags: [v*.*.*]
 permissions:
   contents: write
+  packages: write
+  id-token: write
+  attestations: write
 jobs:
   github-release:
     runs-on: ubuntu-latest
@@ -33,3 +36,19 @@ jobs:
         with:
           files: dist/*
           generate_release_notes: true
+
+  container-publish:
+    # Pin updated after pirlruc/containerdevops first push lands.
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@9bab53c8859ff03e5d4f5df0d7cf2bce049ea3c4
+    with:
+      context: .
+      dockerfile: Dockerfile
+      image_name: gitlab-mcp
+      dockerhub_image: pirlruc/gitlab-mcp
+      platforms: linux/amd64,linux/arm64
+      # Private Free-plan repos cannot use artifact attestations; enable when public.
+      sign: ${{ github.event.repository.visibility == 'public' }}
+      blocking: true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

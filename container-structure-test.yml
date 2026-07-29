@@ -1,0 +1,27 @@
+schemaVersion: "2.0.0"
+metadataTest:
+  envVars:
+    - key: PYTHONDONTWRITEBYTECODE
+      value: "1"
+    - key: PYTHONUNBUFFERED
+      value: "1"
+  user: "65532:65532"
+commandTests:
+  - name: "gitlab-mcp on PATH"
+    command: "which"
+    args: ["gitlab-mcp"]
+    expectedOutput: ["/app/.venv/bin/gitlab-mcp"]
+  - name: "import package"
+    command: "python"
+    args: ["-c", "import gitlab_mcp; print(gitlab_mcp.__name__)"]
+    expectedOutput: ["gitlab_mcp"]
+fileExistenceTests:
+  - name: "venv present"
+    path: "/app/.venv"
+    shouldExist: true
+  - name: "uv absent"
+    path: "/bin/uv"
+    shouldExist: false
+  - name: "no gcc"
+    path: "/usr/bin/gcc"
+    shouldExist: false
