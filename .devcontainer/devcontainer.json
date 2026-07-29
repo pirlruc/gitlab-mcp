@@ -1,0 +1,23 @@
+{
+    "name": "gitlab-mcp",
+    "image": "mcr.microsoft.com/devcontainers/python:3.13",
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+    "postCreateCommand": {
+        "bootstrap": "pip install uv && uv sync --frozen --extra dev && uv run pre-commit install"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-python.mypy-type-checker",
+                "charliermarsh.ruff",
+                "tamasfe.even-better-toml",
+                "njpwerner.autodocstring",
+                "EditorConfig.EditorConfig"
+            ]
+        }
+    }
+}

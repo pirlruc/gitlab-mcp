@@ -1,0 +1,267 @@
+# Authored backlog for gitlab-mcp.
+#
+# Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.1.0/github-issue-adr
+
+milestones:
+  - name: Phase 1 — Foundation
+    epics:
+      - id: GLMCP-001
+        status: open
+        title: Repository foundation (scaffold, uv, CI)
+        overview:
+          problem: >-
+            Self-hosted GitLab 18.6 Free has no MCP server; agents cannot read
+            merge requests through a guarded tool surface.
+          goal: >-
+            Standalone Python repo with github-scaffold, guardrails submodule,
+            five-job CI, and local parity script.
+        architecture:
+          target: mcp-servers/gitlab-mcp repository root
+          modules:
+            - pyproject.toml
+            - .github/workflows/ci.yml
+            - scripts/check-ci-local.sh
+        acceptance_criteria:
+          - Submodules pinned and sync-templates materializes cursor rules
+          - uv sync --frozen --extra dev succeeds on Python 3.13
+          - Five CI jobs defined with SHA-pinned actions
+        guardrail_refs:
+          - PY-RUN-001
+          - CI-001
+          - CI-006
+          - CI-008
+        tasks:
+          - id: GLMCP-001-T1
+            status: open
+            title: Add guardrails and github-scaffold submodules
+            instructions:
+              files:
+                - .gitmodules
+                - docs/guardrails
+                - .github/scaffold
+            verification:
+              - git submodule status
+            guardrail_refs:
+              - PY-RUN-001
+          - id: GLMCP-001-T2
+            status: open
+            title: Author pyproject, pre-commit, and five-job CI
+            instructions:
+              files:
+                - pyproject.toml
+                - .pre-commit-config.yaml
+                - .github/workflows/ci.yml
+            verification:
+              - uv sync --extra dev
+            guardrail_refs:
+              - CI-006
+
+      - id: GLMCP-002
+        status: open
+        title: Quality gate enforcement (radon, coverage 95, Google docs)
+        overview:
+          problem: >-
+            Org defaults are 90% coverage; this repo needs stricter CC/MI and
+            95% coverage gates with a single source of truth.
+          goal: >-
+            scripts/quality_gates.py plus pyproject thresholds; deviations stay empty.
+        architecture:
+          target: scripts/quality_gates.py and docs/guardrails-note.md
+          modules:
+            - scripts/quality_gates.py
+            - pyproject.toml
+        acceptance_criteria:
+          - CC max<=8 avg<=5 and MI min>=40 avg>=50 enforced
+          - Coverage and interrogate fail-under 95
+        guardrail_refs:
+          - PY-TEST-002
+          - PY-DOC-001
+          - CI-009
+        tasks:
+          - id: GLMCP-002-T1
+            status: open
+            title: Implement radon quality_gates.py
+            instructions:
+              files:
+                - scripts/quality_gates.py
+            verification:
+              - uv run python scripts/quality_gates.py
+            guardrail_refs:
+              - CI-009
+
+  - name: Phase 2 — Read tools
+    epics:
+      - id: GLMCP-003
+        status: open
+        title: GitLab REST client
+        overview:
+          problem: Tools need a shared HTTP client with pagination and redaction.
+          goal: httpx client with retry, caps, and typed errors.
+        architecture:
+          target: src/gitlab_mcp/client.py
+          modules:
+            - src/gitlab_mcp/client.py
+            - src/gitlab_mcp/errors.py
+            - src/gitlab_mcp/config.py
+        acceptance_criteria:
+          - Token never appears in logged errors
+          - Pagination respects max pages
+        guardrail_refs:
+          - PY-SEC-002
+        tasks:
+          - id: GLMCP-003-T1
+            status: open
+            title: Implement client, config, and errors
+            instructions:
+              files:
+                - src/gitlab_mcp/client.py
+            verification:
+              - uv run pytest tests/test_client.py
+            guardrail_refs:
+              - PY-TEST-001
+
+      - id: GLMCP-004
+        status: open
+        title: Merge request read tools
+        overview:
+          problem: Agents need list/search/get/diffs/commits/versions.
+          goal: Read tools with Pydantic filter models for low branch complexity.
+        architecture:
+          target: src/gitlab_mcp/tools/merge_requests.py
+          modules:
+            - src/gitlab_mcp/tools/merge_requests.py
+            - src/gitlab_mcp/tools/diffs.py
+            - src/gitlab_mcp/models.py
+        acceptance_criteria:
+          - list/search/get/diffs/commits/versions covered by tests
+        guardrail_refs:
+          - PY-TEST-002
+        tasks:
+          - id: GLMCP-004-T1
+            status: open
+            title: Implement MR list search get and diffs
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/merge_requests.py
+                - src/gitlab_mcp/tools/diffs.py
+            verification:
+              - uv run pytest tests/test_merge_requests.py tests/test_diffs.py
+            guardrail_refs:
+              - PY-TEST-001
+
+      - id: GLMCP-005
+        status: open
+        title: Context read tools
+        overview:
+          problem: Discussions, pipelines, approvals, participants, reviewers needed.
+          goal: Context tools with Free-tier approval degradation.
+        architecture:
+          target: src/gitlab_mcp/tools/discussions.py and pipelines.py
+          modules:
+            - src/gitlab_mcp/tools/discussions.py
+            - src/gitlab_mcp/tools/pipelines.py
+        acceptance_criteria:
+          - Approvals degrade gracefully on Free tier
+        guardrail_refs:
+          - PY-TEST-001
+        tasks:
+          - id: GLMCP-005-T1
+            status: open
+            title: Implement discussions and pipelines tools
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/discussions.py
+                - src/gitlab_mcp/tools/pipelines.py
+            verification:
+              - uv run pytest tests/test_discussions.py tests/test_pipelines.py
+            guardrail_refs:
+              - PY-TEST-001
+
+  - name: Phase 3 — Write tools
+    epics:
+      - id: GLMCP-006
+        status: open
+        title: Thread write tools
+        overview:
+          problem: Agents need to reply and resolve review threads.
+          goal: Create, reply, resolve/unresolve without MR state changes.
+        architecture:
+          target: src/gitlab_mcp/tools/discussions.py write helpers
+          modules:
+            - src/gitlab_mcp/tools/discussions.py
+        acceptance_criteria:
+          - Diff-line position supported for new threads
+        guardrail_refs:
+          - PY-TEST-001
+        tasks:
+          - id: GLMCP-006-T1
+            status: open
+            title: Implement thread create reply resolve
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/discussions.py
+            verification:
+              - uv run pytest tests/test_discussions.py
+            guardrail_refs:
+              - PY-TEST-001
+
+      - id: GLMCP-007
+        status: open
+        title: Update tool and write safety
+        overview:
+          problem: Updates must not allow close/merge via prompt injection.
+          goal: Frozen allowlist and read-only registration gating.
+        architecture:
+          target: src/gitlab_mcp/tools/writes.py
+          modules:
+            - src/gitlab_mcp/tools/writes.py
+            - src/gitlab_mcp/server.py
+        acceptance_criteria:
+          - state_event never reaches the API
+          - Read-only mode omits write tools from tools/list
+        guardrail_refs:
+          - PY-SEC-002
+        tasks:
+          - id: GLMCP-007-T1
+            status: open
+            title: Implement allowlisted update_merge_request
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/writes.py
+            verification:
+              - uv run pytest tests/test_writes.py tests/test_server.py
+            guardrail_refs:
+              - PY-TEST-001
+
+      - id: GLMCP-008
+        status: open
+        title: Documentation and release
+        overview:
+          problem: Operators need configuration and tool docs plus release flow.
+          goal: README, docs, handoff, Commitizen release workflow.
+        architecture:
+          target: docs/ and release workflow
+          modules:
+            - README.md
+            - docs/configuration.md
+            - docs/tools.md
+            - .github/workflows/release.yml
+        acceptance_criteria:
+          - Handoff and issues.yml authored
+        guardrail_refs:
+          - PY-DOC-001
+          - PY-API-001
+        tasks:
+          - id: GLMCP-008-T1
+            status: open
+            title: Author docs and release workflow
+            instructions:
+              files:
+                - README.md
+                - docs/ai-agent-handoff.md
+                - docs/issues.yml
+            verification:
+              - test -f docs/ai-agent-handoff.md
+            guardrail_refs:
+              - PY-DOC-001

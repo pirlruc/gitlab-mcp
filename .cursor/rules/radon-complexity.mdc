@@ -1,0 +1,15 @@
+---
+description: Enforce Radon cyclomatic complexity and maintainability on Python changes
+alwaysApply: true
+---
+
+# Cyclomatic complexity and maintainability (Radon)
+
+When you add or edit **Python** (`.py`) files under **`src/`**, **`scripts/`**, or **`tests/`**, before finishing:
+
+1. Run `uv run radon cc -s <edited-files>` (and `uv run radon mi -s src` for package-wide MI).
+2. Keep every function at **cyclomatic complexity ≤ 8** (prefer ≤ 5 / grade A). Extract helpers rather than leave grade B/C on new code.
+3. Keep package **average CC ≤ 5**, **min MI ≥ 40**, **average MI ≥ 50** — enforced by `scripts/quality_gates.py`.
+4. Prefer Pydantic models with `model_dump(exclude_none=True)` and lookup tables over long `if`/`elif` ladders so branch coverage stays affordable.
+
+Thresholds: `[tool.gitlab_mcp.quality]` in `pyproject.toml` and `docs/guardrails-note.md`.
