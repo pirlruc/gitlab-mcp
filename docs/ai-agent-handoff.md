@@ -42,7 +42,7 @@ uv run gitlab-mcp                 # requires GITLAB_URL + GITLAB_TOKEN
 
 ## Suggested next work
 
-1. Open PR from `feature-gitlab-mcp-foundation` → `main`
+1. Open PR: https://github.com/pirlruc/gitlab-mcp/pull/new/feature-gitlab-mcp-foundation
 2. `setup-issue-scaffold.sh` then `issues-sync.py --dry-run` (approval for publish)
 3. Optional: smoke against a live self-hosted GitLab (`scripts/smoke.py`)
 
