@@ -53,9 +53,8 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Run `docker login dhi.io` + `bash scripts/pin-dhi-digests.sh`; rebuild and Trivy.
-2. Merge [containerdevops#14](https://github.com/pirlruc/containerdevops/pull/14); re-pin to `main` SHA.
-3. Confirm Hub secrets on the repo; exercise container workflow.
-4. Land guardrails PR; bump `docs/guardrails` submodule.
+1. Merge [containerdevops#14](https://github.com/pirlruc/containerdevops/pull/14); re-pin to `main` SHA.
+2. Confirm Hub secrets on the repo; exercise container workflow.
+3. Land guardrails PR; bump `docs/guardrails` submodule.
 
 *Last updated: 2026-07-30*
