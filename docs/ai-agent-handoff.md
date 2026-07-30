@@ -31,7 +31,8 @@ docker buildx build --load -t gitlab-mcp:local .
 - `src/gitlab_mcp/server.py` — MCP stdio entry (`MCPServer` from mcp v2)
 - `Dockerfile` — multi-stage DHI `dhi.io/python:3.13-debian13(-dev)`
 - `scripts/pin-dhi-digests.sh` — refresh base digests after login
-- `docs/docker.md` — run/hardening, DHI free tier, registry coordinates
+- `docs/docker-hub.md` — Hub Overview: pull, run, env vars, Cursor config
+- `docs/docker.md` — maintainer build/hardening, DHI, registry coordinates
 - `scripts/quality_gates.py` — radon CC/MI gates
 - `docs/issues.yml` — authored backlog (GLMCP-001…010)
 - `docs/guardrails/` — submodule (bump after guardrails python/docker pack merges)

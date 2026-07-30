@@ -3,6 +3,8 @@
 Production OCI image for the stdio MCP server. Principles:
 [DOCKER-*](https://github.com/pirlruc/guardrails/tree/main/docker).
 
+**Docker Hub Overview (end-user runbook):** [docker-hub.md](docker-hub.md).
+
 ## Base image (DHI Community)
 
 The image uses free **Docker Hardened Images** Community bases from `dhi.io`

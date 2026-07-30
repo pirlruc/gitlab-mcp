@@ -64,7 +64,9 @@ bash scripts/check-ci-local.sh
 
 ## Container image
 
-See [docs/docker.md](docs/docker.md). Build locally with `docker buildx build --load -t gitlab-mcp:local .`.
+See [docs/docker-hub.md](docs/docker-hub.md) for pull/run/env (Hub Overview) and
+[docs/docker.md](docs/docker.md) for maintainer build notes. Build locally with
+`docker buildx build --load -t gitlab-mcp:local .`.
 Published images: `ghcr.io/pirlruc/gitlab-mcp` and (when configured) `pirlruc/gitlab-mcp` on Docker Hub.
 ## Releases (local Commitizen)
 
