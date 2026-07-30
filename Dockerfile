@@ -1,8 +1,7 @@
 # syntax=docker/dockerfile:1
 # dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003)
 # Refresh digests: docker login dhi.io && bash scripts/pin-dhi-digests.sh
-FROM dhi.io/python:3.13-debian13-dev AS builder
-
+FROM dhi.io/python:3.13-debian13-dev@sha256:f2f9ec95d8c2478ea8c8f4f4ada7678451d4d4859d4562ad572513369cede5fc AS builder
 COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -25,8 +24,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # Runtime — DHI Community minimal Python (no shell / package manager)
 # dhi.io/python:3.13-debian13 — digest pinned (DOCKER-BUILD-003)
-FROM dhi.io/python:3.13-debian13 AS runtime
-
+FROM dhi.io/python:3.13-debian13@sha256:74249c588351146b85a8f21af8c920aa846fe120415caccb67fc2bcf827fc8d5 AS runtime
 ARG VERSION=0.0.0
 ARG REVISION=unknown
 ARG SOURCE=https://github.com/pirlruc/gitlab-mcp

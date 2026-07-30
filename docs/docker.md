@@ -30,6 +30,13 @@ CI: set repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Hub PAT
 with read). The containerdevops build/publish workflows log in to `dhi.io` with
 those secrets before Buildx.
 
+### Scanning notes
+
+Docker Scout (uses DHI attestations / OpenVEX) reports **0** CRITICAL/HIGH on the
+built image. Raw Trivy without VEX may still list unfixed Debian package CVEs
+(especially `linux-libc-dev`); prefer Scout or Trivy with VEX / `--ignore-unfixed`
+when gating publish, and keep app-library scans (`--pkg-types library`) clean.
+
 ## Registries
 
 | Registry | Image |
