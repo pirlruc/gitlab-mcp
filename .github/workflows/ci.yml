@@ -116,6 +116,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      # gitleaks-action lists PR commits on pull_request events
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
