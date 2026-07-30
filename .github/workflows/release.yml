@@ -39,8 +39,8 @@ jobs:
           generate_release_notes: true
 
   container-publish:
-    # Pinned to containerdevops@1db1a99 (dhi.io login).
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@1db1a99e21e4e3c22040e83cf245db7ab999c398
+    # Pinned to containerdevops@797bda2 (dhi_login input).
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@797bda25eac8185a529979f6f5a6ff3cba5a1102
     with:
       context: .
       dockerfile: Dockerfile
@@ -50,6 +50,7 @@ jobs:
       # Private Free-plan repos cannot use artifact attestations; enable when public.
       sign: ${{ github.event.repository.visibility == 'public' }}
       blocking: true
+      dhi_login: true
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
