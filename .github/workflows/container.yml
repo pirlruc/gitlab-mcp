@@ -1,5 +1,5 @@
 ---
-# Thin caller — pinned to containerdevops@155a39c (dhi.io login secrets).
+# Thin caller — pinned to containerdevops@1db1a99 (dhi.io login secrets).
 name: Container
 
 on:
@@ -16,14 +16,14 @@ permissions:
 
 jobs:
   lint:
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@155a39cd8682ffd300f03293ddf9667d5a318975
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@1db1a99e21e4e3c22040e83cf245db7ab999c398
     with:
       dockerfile: Dockerfile
       blocking: ${{ inputs.blocking }}
 
   build:
     needs: lint
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@155a39cd8682ffd300f03293ddf9667d5a318975
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@1db1a99e21e4e3c22040e83cf245db7ab999c398
     with:
       context: .
       dockerfile: Dockerfile
@@ -36,7 +36,7 @@ jobs:
 
   scan:
     needs: build
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@155a39cd8682ffd300f03293ddf9667d5a318975
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@1db1a99e21e4e3c22040e83cf245db7ab999c398
     with:
       image: gitlab-mcp:ci
       image_artifact: container-image

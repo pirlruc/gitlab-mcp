@@ -4,12 +4,13 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 on:
   push:
-    tags: [v*.*.*]
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
 permissions:
   contents: write
   packages: write
   id-token: write
-  attestations: write
 jobs:
   github-release:
     runs-on: ubuntu-latest
@@ -38,8 +39,8 @@ jobs:
           generate_release_notes: true
 
   container-publish:
-    # Pinned to containerdevops@155a39c (dhi.io login).
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@155a39cd8682ffd300f03293ddf9667d5a318975
+    # Pinned to containerdevops@1db1a99 (dhi.io login).
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@1db1a99e21e4e3c22040e83cf245db7ab999c398
     with:
       context: .
       dockerfile: Dockerfile
