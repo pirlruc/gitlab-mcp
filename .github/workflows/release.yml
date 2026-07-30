@@ -39,8 +39,8 @@ jobs:
           generate_release_notes: true
 
   container-publish:
-    # Pinned to containerdevops@797bda2 (dhi_login input).
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@797bda25eac8185a529979f6f5a6ff3cba5a1102
+    # Pinned to containerdevops@f5727bf (dhi_login input).
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@f5727bfca3a985bd83eafd9da7a785e7b4005881
     with:
       context: .
       dockerfile: Dockerfile
