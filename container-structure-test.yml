@@ -5,17 +5,18 @@ metadataTest:
       value: "1"
     - key: PYTHONUNBUFFERED
       value: "1"
+  # DHI runtime nonroot (matches catalog accounts.run-as)
   user: "65532:65532"
 commandTests:
-  - name: "gitlab-mcp on PATH"
-    command: "which"
-    args: ["gitlab-mcp"]
-    expectedOutput: ["/app/.venv/bin/gitlab-mcp"]
+  # Runtime has no shell / which — use absolute paths.
   - name: "import package"
-    command: "python"
+    command: "/app/.venv/bin/python"
     args: ["-c", "import gitlab_mcp; print(gitlab_mcp.__name__)"]
     expectedOutput: ["gitlab_mcp"]
 fileExistenceTests:
+  - name: "gitlab-mcp on PATH venv"
+    path: "/app/.venv/bin/gitlab-mcp"
+    shouldExist: true
   - name: "venv present"
     path: "/app/.venv"
     shouldExist: true

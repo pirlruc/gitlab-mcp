@@ -3,6 +3,33 @@
 Production OCI image for the stdio MCP server. Principles:
 [DOCKER-*](https://github.com/pirlruc/guardrails/tree/main/docker).
 
+## Base image (DHI Community)
+
+The image uses free **Docker Hardened Images** Community bases from `dhi.io`
+(Apache 2.0 — not a timed trial; Select/Enterprise are optional paid SLAs only):
+
+| Stage | Tag |
+|-------|-----|
+| Builder | `dhi.io/python:3.13-debian13-dev` |
+| Runtime | `dhi.io/python:3.13-debian13` |
+
+Debian (glibc) keeps wheels aligned with the previous slim-bookworm stack. Runtime
+is minimal (no shell / package manager) and runs as `65532:65532`. Do **not**
+strip packages from Official Image slim bases — CVE noise there is OS-layer; DHI
+replaces that surface.
+
+Pulls require a free Docker Hub account:
+
+```bash
+docker login dhi.io
+# then pin digests into the Dockerfile (DOCKER-BUILD-003):
+bash scripts/pin-dhi-digests.sh
+```
+
+CI: set repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Hub PAT
+with read). The containerdevops build/publish workflows log in to `dhi.io` with
+those secrets before Buildx.
+
 ## Registries
 
 | Registry | Image |
@@ -75,7 +102,8 @@ produced by the scan workflow.
 ## Local build
 
 ```bash
+docker login dhi.io
+bash scripts/pin-dhi-digests.sh   # digest-pin FROM lines
 docker buildx build --load -t gitlab-mcp:local .
-# Optional: structure test (tool via host or digest-pinned image)
 container-structure-test test --image gitlab-mcp:local --config container-structure-test.yml
 ```
