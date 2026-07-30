@@ -30,7 +30,7 @@ readme = "README.md"
 dev = [
   "bandit[toml]==1.9.4",
   "commitizen>=3.0",
-  "coverage[toml]>=7.13.5",
+  "coverage[toml]>=7.15.2",
   "interrogate>=1.7.0",
   "mypy>=1.20.2",
   "pre-commit==4.6.0",
