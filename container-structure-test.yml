@@ -1,0 +1,28 @@
+schemaVersion: "2.0.0"
+metadataTest:
+  envVars:
+    - key: PYTHONDONTWRITEBYTECODE
+      value: "1"
+    - key: PYTHONUNBUFFERED
+      value: "1"
+  # DHI runtime nonroot (matches catalog accounts.run-as)
+  user: "65532:65532"
+commandTests:
+  # Runtime has no shell / which — use absolute paths.
+  - name: "import package"
+    command: "/app/.venv/bin/python"
+    args: ["-c", "import gitlab_mcp; print(gitlab_mcp.__name__)"]
+    expectedOutput: ["gitlab_mcp"]
+fileExistenceTests:
+  - name: "gitlab-mcp on PATH venv"
+    path: "/app/.venv/bin/gitlab-mcp"
+    shouldExist: true
+  - name: "venv present"
+    path: "/app/.venv"
+    shouldExist: true
+  - name: "uv absent"
+    path: "/bin/uv"
+    shouldExist: false
+  - name: "no gcc"
+    path: "/usr/bin/gcc"
+    shouldExist: false

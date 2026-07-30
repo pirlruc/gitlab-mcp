@@ -1,0 +1,173 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=82.0.1", "wheel>=0.47.0"]
+
+[project]
+name = "gitlab-mcp"
+version = "0.1.0"
+dependencies = [
+  "httpx>=0.28.0",
+  "mcp>=2.0,<3",
+  "pydantic>=2.0",
+  "pydantic-settings>=2.0",
+]
+requires-python = ">=3.13"
+authors = [{name = "Nuno Monteiro"}]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
+description = "MCP server exposing read and safe-update GitLab merge request tools"
+keywords = ["gitlab", "mcp", "merge-request", "stdio"]
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+
+[project.optional-dependencies]
+dev = [
+  "bandit[toml]==1.9.4",
+  "commitizen>=3.0",
+  "coverage[toml]>=7.13.5",
+  "interrogate>=1.7.0",
+  "mypy>=1.20.2",
+  "pre-commit==4.6.0",
+  "pylint>=3.0",
+  "pytest-cov>=7.0",
+  "pytest>=8.0",
+  "pyyaml>=6.0",
+  "radon>=6.0,<7",
+  "ruff==0.15.12",
+]
+
+[project.scripts]
+gitlab-mcp = "gitlab_mcp.server:main"
+
+[project.urls]
+Changelog = "https://github.com/pirlruc/gitlab-mcp/blob/main/CHANGELOG.md"
+Issues = "https://github.com/pirlruc/gitlab-mcp/issues"
+Repository = "https://github.com/pirlruc/gitlab-mcp"
+
+[tool.bandit]
+exclude_dirs = [".venv", "build", "dist", "tests"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "v$version"
+update_changelog_on_bump = true
+version_provider = "pep621"
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
+
+[tool.coverage.run]
+branch = true
+omit = ["tests/*"]
+source = ["src/gitlab_mcp"]
+
+[tool.gitlab_mcp.quality]
+# Repo gates must be >= org floors in docs/guardrails/python/profile.thresholds.yml.
+cyclomatic_avg_max = 5
+cyclomatic_max = 8
+doc_coverage = 95
+maintainability_avg_min = 60
+maintainability_min = 40
+statement_coverage = 95
+branch_coverage = 95
+
+[tool.interrogate]
+exclude = [".git", ".github", ".venv", "build", "dist", "tests"]
+fail-under = 95
+ignore-init-method = true
+ignore-init-module = false
+verbose = 1
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+explicit_package_bases = true
+mypy_path = ["src"]
+namespace_packages = true
+no_implicit_optional = true
+plugins = ["pydantic.mypy"]
+python_version = "3.13"
+show_error_codes = true
+strict = false
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+disallow_untyped_defs = false
+module = "tests.*"
+
+[tool.pydantic-mypy]
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint.main]
+ignore = [".venv", "build", "dist"]
+load-plugins = ["pylint.extensions.docparams"]
+py-version = "3.13"
+source-roots = ["src"]
+
+[tool.pylint.messages_control]
+disable = [
+  "too-few-public-methods",
+  "too-many-arguments",
+  "too-many-positional-arguments",
+  "too-many-locals",
+]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--cov=src/gitlab_mcp",
+  "--cov-branch",
+  "--cov-fail-under=95",
+  "--cov-report=term-missing",
+]
+pythonpath = [".", "src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+preview = true
+src = ["src", "tests", "scripts"]
+target-version = "py313"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+  "B",
+  "C4",
+  "D",
+  "DOC",
+  "E",
+  "F",
+  "I",
+  "SIM",
+  "UP",
+  "W",
+]
+
+[tool.ruff.lint.pydoclint]
+ignore-one-line-docstrings = false
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["SIM117"]
+"scripts/smoke.py" = ["T201"]
+
+[tool.setuptools.package-data]
+gitlab_mcp = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

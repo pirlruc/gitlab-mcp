@@ -1,0 +1,4 @@
+# ShellCheck configuration (CI-023).
+# https://www.shellcheck.net/wiki/Ignore
+shell=bash
+enable=require-variable-braces

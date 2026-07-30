@@ -1,0 +1,54 @@
+---
+name: Release
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+on:
+  push:
+    tags: [v*.*.*]
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        # actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Python
+        # actions/setup-python@v7.0.0
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - name: Set up uv
+        # astral-sh/setup-uv@v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+      - name: Sync dependencies
+        run: uv sync --frozen --extra dev
+      - name: Build distributions
+        run: uv build
+      - name: Publish GitHub Release
+        # softprops/action-gh-release@v3.0.2
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
+        with:
+          files: dist/*
+          generate_release_notes: true
+
+  container-publish:
+    # Pinned to containerdevops@155a39c (dhi.io login).
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@155a39cd8682ffd300f03293ddf9667d5a318975
+    with:
+      context: .
+      dockerfile: Dockerfile
+      image_name: gitlab-mcp
+      dockerhub_image: pirlruc/gitlab-mcp
+      platforms: linux/amd64,linux/arm64
+      # Private Free-plan repos cannot use artifact attestations; enable when public.
+      sign: ${{ github.event.repository.visibility == 'public' }}
+      blocking: true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
