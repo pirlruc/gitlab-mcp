@@ -47,7 +47,7 @@ docker buildx build --load -t gitlab-mcp:local .
   github-actions-only template; restore uv + pre-commit + docker ecosystems after sync.
 - DHI pulls need `docker login dhi.io` locally and Hub secrets in CI
   (`DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`) — Community is free; auth is still
-  required. Workflows pin `containerdevops@797bda2` (dhi.io login step).
+  required. Workflows pin `containerdevops@f5727bf` (dhi.io login step).
 - Runtime has no shell; structure tests use absolute paths under `/app/.venv`.
 - Signing/provenance deferred while private — see `docs/guardrail-deviations.yml`.
 
