@@ -45,7 +45,7 @@ repos:
         args: [--wrap=100, --number]
         additional_dependencies: [mdformat-gfm]
   - repo: https://github.com/crate-ci/typos
-    rev: v1.45.1
+    rev: v1.48.0
     hooks:
       - id: typos
   - repo: https://github.com/pre-commit/pygrep-hooks
@@ -64,19 +64,19 @@ repos:
     hooks:
       - id: gitlint
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
+    rev: v0.16.1
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.20.2
+    rev: v2.3.0
     hooks:
       - id: mypy
         additional_dependencies:
-          - pydantic==2.13.3
-          - pydantic-settings>=2.0
-          - httpx>=0.28.0
+          - pydantic==2.13.4
+          - pydantic-settings>=2.14.2
+          - httpx>=0.28.1
         args: [--config-file=pyproject.toml, -p, gitlab_mcp, -p, tests]
         pass_filenames: false
         always_run: true
@@ -91,7 +91,7 @@ repos:
       - id: bandit
         stages: [pre-push]
   - repo: https://github.com/semgrep/pre-commit
-    rev: v1.159.0
+    rev: v1.172.0
     hooks:
       - id: semgrep-ci
         args: [--config, p/python, --quiet]
