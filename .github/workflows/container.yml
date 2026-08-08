@@ -3,6 +3,10 @@
 name: Container
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       blocking:
@@ -19,7 +23,8 @@ jobs:
     uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
     with:
       dockerfile: Dockerfile
-      blocking: ${{ inputs.blocking }}
+      # Push/PR to main: blocking. Manual dispatch: respect the input.
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
 
   build:
     needs: lint
@@ -29,7 +34,7 @@ jobs:
       dockerfile: Dockerfile
       image_name: gitlab-mcp:ci
       structure_test_config: container-structure-test.yml
-      blocking: ${{ inputs.blocking }}
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       dhi_login: true
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -41,4 +46,4 @@ jobs:
     with:
       image: gitlab-mcp:ci
       image_artifact: container-image
-      blocking: ${{ inputs.blocking }}
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}

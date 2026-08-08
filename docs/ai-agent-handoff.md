@@ -44,6 +44,7 @@ docker buildx build --load -t gitlab-mcp:local .
 
 - uv is not on host PATH; use `.tools/uv` (project-local binary, gitignored).
 - System Python may be 3.14 without `python3-venv`; uv manages 3.13.
+- `requires-python` is `>=3.13,<3.15` so the lock resolves only for supported CPythons.
 - MCP SDK v2: `FastMCP` → `MCPServer` (`mcp.server.mcpserver`).
 - `GITLAB_READ_ONLY=1` omits write tools from `tools/list`.
 - After scaffold bump, `sync-templates.sh` **seeds** `.github/dependabot.yml` once and does
@@ -58,12 +59,14 @@ docker buildx build --load -t gitlab-mcp:local .
   `patterns: ["*"]` and `multi-ecosystem-group: all-dependencies` and **no** per-ecosystem
   `schedule` or `groups:`. Matches GitHub multi-ecosystem docs. Confirm under
   Insights → Dependency graph → Dependabot after the config lands on the default branch.
+- CI security job failed on this branch when `cryptography` 49.0.0 hit GHSA-g6cj-pr64-35w5;
+  lockfile bumps to 50.0.0. Container workflow now also runs on `push`/`pull_request` to
+  `main` (blocking); `workflow_dispatch` still respects the blocking input.
 
 ## Suggested next work
 
-1. Bump `docs/guardrails` and `.github/scaffold` to the dependency-update-policy SHAs; re-run sync.
-2. Confirm Hub secrets on the repo; exercise container workflow.
-3. Implement GLMCP-011 (wheel/sdist supply-chain parity).
-4. After Dependabot lands on `main`, trigger a version update and confirm one PR for all ecosystems.
+1. Confirm Hub secrets; watch Container on the next push/PR to `main`.
+2. Implement GLMCP-011 (wheel/sdist supply-chain parity).
+3. After Dependabot lands on `main`, trigger a version update and confirm one PR for all ecosystems.
 
 *Last updated: 2026-08-08*
