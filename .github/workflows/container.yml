@@ -1,5 +1,5 @@
 ---
-# Thin caller — pinned to containerdevops@230be8e (dhi_login input).
+# Thin caller — pinned to containerdevops@fbf364d (checkout_token for private callers).
 name: Container
 
 on:
@@ -20,15 +20,17 @@ permissions:
 
 jobs:
   lint:
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@fbf364d2734de78948621488038c53279997233b
     with:
       dockerfile: Dockerfile
       # Push/PR to main: blocking. Manual dispatch: respect the input.
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build:
     needs: lint
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@fbf364d2734de78948621488038c53279997233b
     with:
       context: .
       dockerfile: Dockerfile
@@ -39,11 +41,14 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan:
     needs: build
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@fbf364d2734de78948621488038c53279997233b
     with:
       image: gitlab-mcp:ci
       image_artifact: container-image
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

@@ -32,6 +32,11 @@ CI: set repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Hub PAT
 with read). The containerdevops build/publish workflows log in to `dhi.io` with
 those secrets before Buildx.
 
+Also set `CONTAINERDEVOPS_READ_TOKEN`: a fine-grained PAT (or classic) with
+`contents:read` on private `pirlruc/containerdevops`. Caller `GITHUB_TOKEN`
+cannot sparse-checkout that repo; without this secret Container CI fails at
+checkout with REST `Not Found`.
+
 ### Scanning notes
 
 Docker Scout (uses DHI attestations / OpenVEX) reports **0** CRITICAL/HIGH on the

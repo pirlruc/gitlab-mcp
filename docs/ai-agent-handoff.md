@@ -51,7 +51,8 @@ docker buildx build --load -t gitlab-mcp:local .
   not overwrite it — the multi-ecosystem config is safe across syncs.
 - DHI pulls need `docker login dhi.io` locally and Hub secrets in CI
   (`DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`) — Community is free; auth is still
-  required. Workflows pin `containerdevops@230be8e` (dhi.io login step).
+  required. Workflows pin `containerdevops@fbf364d` and pass
+  `CONTAINERDEVOPS_READ_TOKEN` as `checkout_token` (private-repo script checkout).
 - Runtime has no shell; structure tests use absolute paths under `/app/.venv`.
 - Signing/provenance deferred while private — see `docs/guardrail-deviations.yml`.
 - Dependabot multi-ecosystem **accepted form (local validation 2026-08-08):** `schedule`
@@ -65,8 +66,8 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Confirm Hub secrets; watch Container on the next push/PR to `main`.
+1. Ensure `CONTAINERDEVOPS_READ_TOKEN` is set; re-run Container on PR #13.
 2. Implement GLMCP-011 (wheel/sdist supply-chain parity).
 3. After Dependabot lands on `main`, trigger a version update and confirm one PR for all ecosystems.
 
-*Last updated: 2026-08-08*
+*Last updated: 2026-08-09*
