@@ -51,7 +51,7 @@ docker buildx build --load -t gitlab-mcp:local .
   not overwrite it — the multi-ecosystem config is safe across syncs.
 - DHI pulls need `docker login dhi.io` locally and Hub secrets in CI
   (`DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`) — Community is free; auth is still
-  required. Workflows pin `containerdevops@297e1da` and pass matching
+  required. Workflows pin `containerdevops@7cf148d` and pass matching
   `scripts_ref` plus `CONTAINERDEVOPS_READ_TOKEN` as `checkout_token`
   (private-repo script checkout).
 - Runtime has no shell; structure tests use absolute paths under `/app/.venv`.
