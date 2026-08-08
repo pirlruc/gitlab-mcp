@@ -1,5 +1,5 @@
 ---
-# Thin caller — pinned to containerdevops@fbf364d (checkout_token for private callers).
+# Thin caller — pinned to containerdevops@9f97e73 (checkout_token + scripts_ref).
 name: Container
 
 on:
@@ -20,9 +20,10 @@ permissions:
 
 jobs:
   lint:
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@fbf364d2734de78948621488038c53279997233b
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@9f97e73c51375d8dc6903bb77f759628dfa1a884
     with:
       dockerfile: Dockerfile
+      scripts_ref: 9f97e73c51375d8dc6903bb77f759628dfa1a884
       # Push/PR to main: blocking. Manual dispatch: respect the input.
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
@@ -30,12 +31,13 @@ jobs:
 
   build:
     needs: lint
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@fbf364d2734de78948621488038c53279997233b
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@9f97e73c51375d8dc6903bb77f759628dfa1a884
     with:
       context: .
       dockerfile: Dockerfile
       image_name: gitlab-mcp:ci
       structure_test_config: container-structure-test.yml
+      scripts_ref: 9f97e73c51375d8dc6903bb77f759628dfa1a884
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       dhi_login: true
     secrets:
@@ -45,10 +47,11 @@ jobs:
 
   scan:
     needs: build
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@fbf364d2734de78948621488038c53279997233b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9f97e73c51375d8dc6903bb77f759628dfa1a884
     with:
       image: gitlab-mcp:ci
       image_artifact: container-image
+      scripts_ref: 9f97e73c51375d8dc6903bb77f759628dfa1a884
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
