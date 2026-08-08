@@ -1,0 +1,8 @@
+# Application-library gate for DHI-based images.
+# OS-layer Debian CVEs (e.g. linux-libc-dev) remain noisy without DHI VEX;
+# Docker Scout / OpenVEX is the OS signal — see docs/docker.md.
+scan:
+  pkg-types:
+    - library
+vulnerability:
+  ignore-unfixed: true

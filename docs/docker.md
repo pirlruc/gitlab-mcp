@@ -44,6 +44,9 @@ built image. Raw Trivy without VEX may still list unfixed Debian package CVEs
 (especially `linux-libc-dev`); prefer Scout or Trivy with VEX / `--ignore-unfixed`
 when gating publish, and keep app-library scans (`--pkg-types library`) clean.
 
+CI uses root `trivy.yaml` (`pkg-types: library`, `ignore-unfixed: true`) so the
+blocking Container scan matches that policy.
+
 ## Registries
 
 | Registry | Image |

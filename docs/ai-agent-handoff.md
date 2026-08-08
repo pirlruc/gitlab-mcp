@@ -71,4 +71,10 @@ docker buildx build --load -t gitlab-mcp:local .
 2. Implement GLMCP-011 (wheel/sdist supply-chain parity).
 3. After Dependabot lands on `main`, trigger a version update and confirm one PR for all ecosystems.
 
+## Recent history
+
+- Container CI: private checkout via `checkout_token` + `scripts_ref`; pin
+  `containerdevops@194b06b`. Root `trivy.yaml` gates on library packages
+  (DHI OS noise deferred to Scout/VEX).
+
 *Last updated: 2026-08-09*
