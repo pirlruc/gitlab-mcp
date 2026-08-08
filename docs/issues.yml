@@ -7,7 +7,7 @@ milestones:
   - name: Phase 1 — Foundation
     epics:
       - id: GLMCP-001
-        status: open
+        status: done
         title: Repository foundation (scaffold, uv, CI)
         overview:
           problem: >-
@@ -33,7 +33,7 @@ milestones:
           - CI-008
         tasks:
           - id: GLMCP-001-T1
-            status: open
+            status: done
             title: Add guardrails and github-scaffold submodules
             instructions:
               files:
@@ -45,7 +45,7 @@ milestones:
             guardrail_refs:
               - PY-RUN-001
           - id: GLMCP-001-T2
-            status: open
+            status: done
             title: Author pyproject, pre-commit, and five-job CI
             instructions:
               files:
@@ -58,7 +58,7 @@ milestones:
               - CI-006
 
       - id: GLMCP-002
-        status: open
+        status: done
         title: Quality gate enforcement (radon, coverage 95, Google docs)
         overview:
           problem: >-
@@ -80,7 +80,7 @@ milestones:
           - CI-009
         tasks:
           - id: GLMCP-002-T1
-            status: open
+            status: done
             title: Implement radon quality_gates.py
             instructions:
               files:
@@ -93,7 +93,7 @@ milestones:
   - name: Phase 2 — Read tools
     epics:
       - id: GLMCP-003
-        status: open
+        status: done
         title: GitLab REST client
         overview:
           problem: Tools need a shared HTTP client with pagination and redaction.
@@ -111,7 +111,7 @@ milestones:
           - PY-SEC-002
         tasks:
           - id: GLMCP-003-T1
-            status: open
+            status: done
             title: Implement client, config, and errors
             instructions:
               files:
@@ -122,7 +122,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-004
-        status: open
+        status: done
         title: Merge request read tools
         overview:
           problem: Agents need list/search/get/diffs/commits/versions.
@@ -139,7 +139,7 @@ milestones:
           - PY-TEST-002
         tasks:
           - id: GLMCP-004-T1
-            status: open
+            status: done
             title: Implement MR list search get and diffs
             instructions:
               files:
@@ -151,7 +151,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-005
-        status: open
+        status: done
         title: Context read tools
         overview:
           problem: Discussions, pipelines, approvals, participants, reviewers needed.
@@ -167,7 +167,7 @@ milestones:
           - PY-TEST-001
         tasks:
           - id: GLMCP-005-T1
-            status: open
+            status: done
             title: Implement discussions and pipelines tools
             instructions:
               files:
@@ -181,7 +181,7 @@ milestones:
   - name: Phase 3 — Write tools
     epics:
       - id: GLMCP-006
-        status: open
+        status: done
         title: Thread write tools
         overview:
           problem: Agents need to reply and resolve review threads.
@@ -196,7 +196,7 @@ milestones:
           - PY-TEST-001
         tasks:
           - id: GLMCP-006-T1
-            status: open
+            status: done
             title: Implement thread create reply resolve
             instructions:
               files:
@@ -207,7 +207,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-007
-        status: open
+        status: done
         title: Update tool and write safety
         overview:
           problem: Updates must not allow close/merge via prompt injection.
@@ -224,7 +224,7 @@ milestones:
           - PY-SEC-002
         tasks:
           - id: GLMCP-007-T1
-            status: open
+            status: done
             title: Implement allowlisted update_merge_request
             instructions:
               files:
@@ -235,7 +235,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-008
-        status: open
+        status: done
         title: Documentation and release
         overview:
           problem: Operators need configuration and tool docs plus release flow.
@@ -254,7 +254,7 @@ milestones:
           - PY-API-001
         tasks:
           - id: GLMCP-008-T1
-            status: open
+            status: done
             title: Author docs and release workflow
             instructions:
               files:
@@ -361,3 +361,45 @@ milestones:
               - bash scripts/check-ci-local.sh
             guardrail_refs:
               - PY-CPLX-002
+
+  - name: Phase 5 — Supply chain parity
+    epics:
+      - id: GLMCP-011
+        status: open
+        title: Wheel and sdist SBOM, provenance, and signing
+        overview:
+          problem: >-
+            The same release tag publishes a container with SBOM, cosign
+            signing, and SLSA provenance, while the wheel and sdist land
+            unsigned with no SBOM — sign: is passed only to the container job.
+          goal: >-
+            Python artifacts reach supply-chain parity with the container
+            built from the same tag (SBOM, provenance attestation, signing).
+        architecture:
+          target: .github/workflows/release.yml github-release job
+          modules:
+            - .github/workflows/release.yml
+            - docs/guardrail-deviations.yml
+        acceptance_criteria:
+          - Release workflow emits SBOM for dist/* (CycloneDX or SPDX)
+          - Provenance attestation attached for wheel/sdist when public
+          - Documented mechanism (e.g. pypa/gh-action-pypi-publish attestations)
+        guardrail_refs:
+          - SC-DEP-001
+          - DOCKER-SEC-002
+          - DOCKER-SEC-003
+          - DOCKER-SEC-004
+        tasks:
+          - id: GLMCP-011-T1
+            status: open
+            title: Add SBOM and attestation steps to github-release job
+            instructions:
+              files:
+                - .github/workflows/release.yml
+            verification:
+              - >-
+                Release workflow documents or runs SBOM generation and
+                provenance for dist artifacts
+            guardrail_refs:
+              - DOCKER-SEC-002
+
