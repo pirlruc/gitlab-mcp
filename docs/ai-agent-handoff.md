@@ -14,6 +14,7 @@
 | Guardrails realign (GLMCP-010) | In progress — MI avg 60; note/rule removed |
 | Supply-chain parity (GLMCP-011) | Open — wheel/sdist SBOM + provenance vs container |
 | Dependabot Insights (GLMCP-012) | Open — confirm multi-ecosystem group after merge to main |
+| Official MCP parity (GLMCP-014…021) | Open — authored from GitLab MCP tools docs; not implemented yet |
 
 ## Commands
 
@@ -36,7 +37,7 @@ docker buildx build --load -t gitlab-mcp:local .
 - `docs/docker-hub.md` — Hub Overview: pull, run, env vars, Cursor config
 - `docs/docker.md` — maintainer build/hardening, DHI, registry coordinates
 - `scripts/quality_gates.py` — radon CC/MI gates
-- `docs/issues.yml` — authored backlog (GLMCP-001…011); 001–008 marked `done`
+- `docs/issues.yml` — authored backlog (GLMCP-001…021); 001–008 marked `done`
 - `docs/guardrails/` — submodule @ `c43e347` (includes `supply-chain/` / `SC-DEP-*`)
 - `.github/scaffold/` — submodule @ `7435f1d` (`dependency-updates.mdc` + Dependabot seed_once)
 - `.github/dependabot.yml` — multi-ecosystem `all-dependencies` group, monthly (SC-DEP-*)
@@ -70,13 +71,16 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Ensure `CONTAINERDEVOPS_READ_TOKEN` is set; Container CI is green on PR #13.
-2. After merge: GLMCP-012 Insights confirmation for Dependabot multi-ecosystem group.
-3. Implement GLMCP-011 (wheel/sdist supply-chain parity).
-4. Dry-run then publish `GLMCP-012` / `GLMCP-013` via `issues-sync.py` (needs approval).
+1. Push PR #13; confirm Container CI still green with review fixes.
+2. After issues sync: implement Phase 6 starting with GLMCP-014 (official MR surface alignment).
+3. After merge: GLMCP-012 Insights confirmation for Dependabot multi-ecosystem group.
+4. Implement GLMCP-011 (wheel/sdist supply-chain parity); decide GLMCP-020 (create_merge_request).
 
 ## Recent history
 
+- Authored Phase 6 (`GLMCP-014`…`021`) from
+  https://docs.gitlab.com/user/model_context_protocol/mcp_server_tools/ —
+  missing tools plus alignment of existing MR surface.
 - Addressed Copilot/Qodo review: docs/trivy policy wording, release pin parity,
   fork-PR Container skip, uv audit fallback.
 - Authored `GLMCP-012` / `GLMCP-013` (Dependabot Insights + review epics).
