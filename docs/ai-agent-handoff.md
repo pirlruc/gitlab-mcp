@@ -13,7 +13,7 @@
 | Container image (GLMCP-009) | In progress — DHI Python base; pin digests after `docker login dhi.io` |
 | Guardrails realign (GLMCP-010) | In progress — MI avg 60; note/rule removed |
 | Supply-chain parity (GLMCP-011) | Open — wheel/sdist SBOM + provenance vs container |
-| Dependabot Insights (GLMCP-012) | Blocked upstream — re-check ran with `multi-ecosystem-update:true`; create_pull_request returns 204 and no PR opens (known multi-ecosystem gap; docker/gha still fail auth) |
+| Dependabot Insights (GLMCP-012) | Done — multi-ecosystem `all-dependencies` PR #62 merged; registries + PAT access working |
 | Official MCP parity (GLMCP-014…021) | Open — authored from GitLab MCP tools docs; not implemented yet |
 
 ## Commands
@@ -79,28 +79,26 @@ docker buildx build --load -t gitlab-mcp:local .
   for `dhi.io`. Secrets live under Settings → Dependabot (not Actions).
 - CI security job failed on this branch when `cryptography` 49.0.0 hit GHSA-g6cj-pr64-35w5;
   lockfile on main is already `cryptography` 50.0.0 (PR #12 is obsolete). Container
-  workflow runs on `push`/`pull_request` to `main` (blocking).
+  workflow runs on `push`/`pull_request` to `main` (blocking). Container jobs skip
+  `dependabot[bot]` (Actions secrets unavailable on Dependabot PRs for private
+  reusable workflows). Host Docker Desktop may fail pulls via GPG creds helper;
+  bases already cached still build (or unlock the keyring / `docker login`).
 
 ## Suggested next work
 
-1. After registries land: confirm `github_actions` / `docker` Dependabot jobs are green
-   and watch for a single `all-dependencies` PR ([GLMCP-012](https://github.com/pirlruc/gitlab-mcp/issues/38)).
+1. Close [GLMCP-012](https://github.com/pirlruc/gitlab-mcp/issues/38) as done (Insights confirmed via PR #62).
 2. Implement Phase 6 starting with [GLMCP-014](https://github.com/pirlruc/gitlab-mcp/issues/42).
 3. Decide [GLMCP-020](https://github.com/pirlruc/gitlab-mcp/issues/58); then GLMCP-011.
 
 ## Recent history
 
-- Wired Dependabot `registries:` for personal-account PAT (`github-private`) and
-  `dhi.io` (`DOCKERHUB_*`) so private workflow pins and DHI bases can resolve.
-- Closed stale Dependabot PRs #2/#3/#5/#6/#11/#12; touched `dependabot.yml`
-  (`2d4a910`) to re-trigger. Re-check: uv/pre_commit success again
-  (`Creating a pull request for 'all-dependencies'` → 204) but **still no PR**;
-  docker/gha still fail until registries secrets are wired. Matches known
-  multi-ecosystem manual-trigger limitations
-  (dependabot/dependabot-core#12948).
-- Merged [PR #13](https://github.com/pirlruc/gitlab-mcp/pull/13) to `main`
-  (`9df535a`): multi-ecosystem Dependabot, container CI fixes, Phase 6 backlog.
-- Synced full `docs/issues.yml` to GitHub (21 epics / 27 tasks; done items closed).
-  Phase 6: issues #42–#61 (`GLMCP-014`…`021`).
+- Merged [PR #62](https://github.com/pirlruc/gitlab-mcp/pull/62) (`all-dependencies`):
+  ruff 0.16.1, coverage 7.15.4, pre-commit 4.6.1, setuptools floor, pre-commit
+  hook bumps; fixed ruff property docstrings; local `check-ci-local` + Docker
+  image `gitlab-mcp:local` verified.
+- Dependabot multi-ecosystem path confirmed after PAT (`guardrails`+) and
+  `registries:` for git / dhi.io.
+- Merged [PR #13](https://github.com/pirlruc/gitlab-mcp/pull/13) to `main`:
+  multi-ecosystem Dependabot, container CI fixes, Phase 6 backlog.
 
 *Last updated: 2026-08-09*

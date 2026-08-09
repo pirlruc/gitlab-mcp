@@ -404,7 +404,7 @@ milestones:
               - DOCKER-SEC-002
 
       - id: GLMCP-012
-        status: open
+        status: done
         title: Confirm Dependabot multi-ecosystem Insights after merge
         overview:
           problem: >-
@@ -431,7 +431,7 @@ milestones:
           - SC-DEP-003
         tasks:
           - id: GLMCP-012-T1
-            status: open
+            status: done
             title: Verify Insights multi-ecosystem group on main
             instructions:
               files:
