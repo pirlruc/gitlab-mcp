@@ -71,21 +71,22 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Push PR #13; confirm Container CI still green with review fixes.
-2. After issues sync: implement Phase 6 starting with GLMCP-014 (official MR surface alignment).
-3. After merge: GLMCP-012 Insights confirmation for Dependabot multi-ecosystem group.
-4. Implement GLMCP-011 (wheel/sdist supply-chain parity); decide GLMCP-020 (create_merge_request).
+1. Confirm PR #13 CI still green after review + issues commits.
+2. Implement Phase 6 starting with [GLMCP-014](https://github.com/pirlruc/gitlab-mcp/issues/42) (official MR surface alignment).
+3. After merge: [GLMCP-012](https://github.com/pirlruc/gitlab-mcp/issues/38) Insights confirmation for Dependabot.
+4. Decide [GLMCP-020](https://github.com/pirlruc/gitlab-mcp/issues/58) (create_merge_request vs permanent block); then GLMCP-011 supply-chain parity.
 
 ## Recent history
 
-- Authored Phase 6 (`GLMCP-014`…`021`) from
+- Synced full `docs/issues.yml` to GitHub (21 epics / 27 tasks; done items closed).
+  Phase 6: issues #42–#61 (`GLMCP-014`…`021`).
+- Authored Phase 6 from
   https://docs.gitlab.com/user/model_context_protocol/mcp_server_tools/ —
   missing tools plus alignment of existing MR surface.
 - Addressed Copilot/Qodo review: docs/trivy policy wording, release pin parity,
   fork-PR Container skip, uv audit fallback.
-- Authored `GLMCP-012` / `GLMCP-013` (Dependabot Insights + review epics).
 - Container CI: private checkout via `checkout_token` + `scripts_ref`; pin
-  `containerdevops@4185836`. Scan passes `pkg_types: library` (DHI OS noise
-  deferred to Scout/VEX); root `trivy.yaml` sets `ignore-unfixed`.
+  `containerdevops@4185836`. Scan passes `pkg_types: library`; root
+  `trivy.yaml` sets `ignore-unfixed`.
 
 *Last updated: 2026-08-09*
