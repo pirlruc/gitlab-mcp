@@ -39,14 +39,15 @@ jobs:
           generate_release_notes: true
 
   container-publish:
-    # Pinned to containerdevops@230be8e (dhi_login input).
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
+    # Same pin as .github/workflows/container.yml (checkout_token + scripts_ref).
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
     with:
       context: .
       dockerfile: Dockerfile
       image_name: gitlab-mcp
       dockerhub_image: pirlruc/gitlab-mcp
       platforms: linux/amd64,linux/arm64
+      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
       # Private Free-plan repos cannot use artifact attestations; enable when public.
       sign: ${{ github.event.repository.visibility == 'public' }}
       blocking: true
@@ -54,3 +55,4 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

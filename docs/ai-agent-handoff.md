@@ -13,6 +13,7 @@
 | Container image (GLMCP-009) | In progress — DHI Python base; pin digests after `docker login dhi.io` |
 | Guardrails realign (GLMCP-010) | In progress — MI avg 60; note/rule removed |
 | Supply-chain parity (GLMCP-011) | Open — wheel/sdist SBOM + provenance vs container |
+| Dependabot Insights (GLMCP-012) | Open — confirm multi-ecosystem group after merge to main |
 
 ## Commands
 
@@ -51,9 +52,11 @@ docker buildx build --load -t gitlab-mcp:local .
   not overwrite it — the multi-ecosystem config is safe across syncs.
 - DHI pulls need `docker login dhi.io` locally and Hub secrets in CI
   (`DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`) — Community is free; auth is still
-  required. Workflows pin `containerdevops@4185836` and pass matching
-  `scripts_ref` plus `CONTAINERDEVOPS_READ_TOKEN` as `checkout_token`
-  (private-repo script checkout). Scan uses `pkg_types: library` for DHI.
+  required. Container CI and Release `container-publish` pin
+  `containerdevops@4185836` with matching `scripts_ref`, plus
+  `CONTAINERDEVOPS_READ_TOKEN` as `checkout_token` (private-repo script
+  checkout). Scan passes `pkg_types: library`; `trivy.yaml` sets
+  `ignore-unfixed` only. Container jobs skip fork PRs (no secrets).
 - Runtime has no shell; structure tests use absolute paths under `/app/.venv`.
 - Signing/provenance deferred while private — see `docs/guardrail-deviations.yml`.
 - Dependabot multi-ecosystem **accepted form (local validation 2026-08-08):** `schedule`
@@ -67,12 +70,16 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Ensure `CONTAINERDEVOPS_READ_TOKEN` is set; re-run Container on PR #13.
-2. Implement GLMCP-011 (wheel/sdist supply-chain parity).
-3. After Dependabot lands on `main`, trigger a version update and confirm one PR for all ecosystems.
+1. Ensure `CONTAINERDEVOPS_READ_TOKEN` is set; Container CI is green on PR #13.
+2. After merge: GLMCP-012 Insights confirmation for Dependabot multi-ecosystem group.
+3. Implement GLMCP-011 (wheel/sdist supply-chain parity).
+4. Dry-run then publish `GLMCP-012` / `GLMCP-013` via `issues-sync.py` (needs approval).
 
 ## Recent history
 
+- Addressed Copilot/Qodo review: docs/trivy policy wording, release pin parity,
+  fork-PR Container skip, uv audit fallback.
+- Authored `GLMCP-012` / `GLMCP-013` (Dependabot Insights + review epics).
 - Container CI: private checkout via `checkout_token` + `scripts_ref`; pin
   `containerdevops@4185836`. Scan passes `pkg_types: library` (DHI OS noise
   deferred to Scout/VEX); root `trivy.yaml` sets `ignore-unfixed`.
