@@ -20,8 +20,12 @@ permissions:
 
 jobs:
   lint:
-    # Fork PRs do not receive repository secrets (CONTAINERDEVOPS_READ_TOKEN / DOCKERHUB_*).
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Fork PRs lack secrets; Dependabot PRs cannot use Actions secrets for private
+    # reusable workflows (containerdevops).
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
     with:
       dockerfile: Dockerfile
@@ -33,7 +37,10 @@ jobs:
 
   build:
     needs: lint
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     uses: pirlruc/containerdevops/.github/workflows/container-build.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
     with:
       context: .
@@ -50,7 +57,10 @@ jobs:
 
   scan:
     needs: build
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
     with:
       image: gitlab-mcp:ci

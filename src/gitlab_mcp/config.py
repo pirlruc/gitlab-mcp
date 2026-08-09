@@ -56,7 +56,7 @@ class Settings(BaseSettings):
 
     @property
     def api_base(self) -> str:
-        """Return the GitLab REST API v4 base URL.
+        """GitLab REST API v4 base URL.
 
         Returns:
             Absolute API base ending in ``/api/v4``.
@@ -69,7 +69,7 @@ class Settings(BaseSettings):
 
     @property
     def verify(self) -> bool | str:
-        """Return the httpx ``verify`` argument.
+        """TLS verify setting passed to httpx.
 
         Returns:
             CA bundle path when set, otherwise the boolean SSL flag.
