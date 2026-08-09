@@ -13,7 +13,7 @@
 | Container image (GLMCP-009) | In progress — DHI Python base; pin digests after `docker login dhi.io` |
 | Guardrails realign (GLMCP-010) | In progress — MI avg 60; note/rule removed |
 | Supply-chain parity (GLMCP-011) | Open — wheel/sdist SBOM + provenance vs container |
-| Dependabot Insights (GLMCP-012) | In progress — stale Dependabot PRs closed; re-check triggered via dependabot.yml touch |
+| Dependabot Insights (GLMCP-012) | Blocked upstream — re-check ran with `multi-ecosystem-update:true`; create_pull_request returns 204 and no PR opens (known multi-ecosystem gap; docker/gha still fail auth) |
 | Official MCP parity (GLMCP-014…021) | Open — authored from GitLab MCP tools docs; not implemented yet |
 
 ## Commands
@@ -93,8 +93,12 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Recent history
 
-- Closed stale Dependabot PRs #2/#3/#5/#6/#11/#12; touched `dependabot.yml` to
-  re-trigger multi-ecosystem update after the open-PR limit cleared.
+- Closed stale Dependabot PRs #2/#3/#5/#6/#11/#12; touched `dependabot.yml`
+  (`2d4a910`) to re-trigger. Re-check: uv/pre_commit success again
+  (`Creating a pull request for 'all-dependencies'` → 204) but **still no PR**;
+  docker/gha still fail (dhi.io / private containerdevops). Matches known
+  multi-ecosystem manual-trigger limitations
+  (dependabot/dependabot-core#12948).
 - Merged [PR #13](https://github.com/pirlruc/gitlab-mcp/pull/13) to `main`
   (`9df535a`): multi-ecosystem Dependabot, container CI fixes, Phase 6 backlog.
 - Post-merge Dependabot runs: uv/pre_commit success (grouped PR attempt),
