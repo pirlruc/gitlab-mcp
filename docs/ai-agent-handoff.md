@@ -72,41 +72,35 @@ docker buildx build --load -t gitlab-mcp:local .
   while six pre-existing per-ecosystem Dependabot PRs occupied the default
   open-PR limit. Those PRs (#2, #3, #5, #6, #11, #12) were closed on 2026-08-09
   and `dependabot.yml` was touched to re-trigger.
-- **Dependabot access gaps (pre-existing):** `github_actions` fails with
-  `git_dependencies_not_reachable` for private `pirlruc/containerdevops` (and
-  submodule clone 403 for `github-scaffold`). `docker` fails with
-  `private_source_authentication_failure` for `dhi.io`. Public actions/uv packages
-  still resolve. Grant Dependabot access to private sibling repos and a dhi.io
-  registry credential if those ecosystems should update inside the group.
+- **Dependabot private access (personal account):** org “grant Dependabot access”
+  UI is unavailable. Wire Dependabot secrets via top-level `registries:` in
+  `.github/dependabot.yml`: `DEPENDABOT_GITHUB_TOKEN` (PAT, `type: git`) for
+  private siblings / reusable workflows, and `DOCKERHUB_*` (`type: docker-registry`)
+  for `dhi.io`. Secrets live under Settings → Dependabot (not Actions).
 - CI security job failed on this branch when `cryptography` 49.0.0 hit GHSA-g6cj-pr64-35w5;
   lockfile on main is already `cryptography` 50.0.0 (PR #12 is obsolete). Container
   workflow runs on `push`/`pull_request` to `main` (blocking).
 
 ## Suggested next work
 
-1. Confirm [GLMCP-012](https://github.com/pirlruc/gitlab-mcp/issues/38): single
-   `all-dependencies` PR (or document remaining registry/access gaps).
-2. Optionally grant Dependabot access to private `containerdevops` / `github-scaffold`
-   and dhi.io credentials so those ecosystems join the group.
-3. Implement Phase 6 starting with [GLMCP-014](https://github.com/pirlruc/gitlab-mcp/issues/42).
-4. Decide [GLMCP-020](https://github.com/pirlruc/gitlab-mcp/issues/58); then GLMCP-011.
+1. After registries land: confirm `github_actions` / `docker` Dependabot jobs are green
+   and watch for a single `all-dependencies` PR ([GLMCP-012](https://github.com/pirlruc/gitlab-mcp/issues/38)).
+2. Implement Phase 6 starting with [GLMCP-014](https://github.com/pirlruc/gitlab-mcp/issues/42).
+3. Decide [GLMCP-020](https://github.com/pirlruc/gitlab-mcp/issues/58); then GLMCP-011.
 
 ## Recent history
 
+- Wired Dependabot `registries:` for personal-account PAT (`github-private`) and
+  `dhi.io` (`DOCKERHUB_*`) so private workflow pins and DHI bases can resolve.
 - Closed stale Dependabot PRs #2/#3/#5/#6/#11/#12; touched `dependabot.yml`
   (`2d4a910`) to re-trigger. Re-check: uv/pre_commit success again
   (`Creating a pull request for 'all-dependencies'` → 204) but **still no PR**;
-  docker/gha still fail (dhi.io / private containerdevops). Matches known
+  docker/gha still fail until registries secrets are wired. Matches known
   multi-ecosystem manual-trigger limitations
   (dependabot/dependabot-core#12948).
 - Merged [PR #13](https://github.com/pirlruc/gitlab-mcp/pull/13) to `main`
   (`9df535a`): multi-ecosystem Dependabot, container CI fixes, Phase 6 backlog.
-- Post-merge Dependabot runs: uv/pre_commit success (grouped PR attempt),
-  github_actions/docker failure (private repo / dhi.io auth).
 - Synced full `docs/issues.yml` to GitHub (21 epics / 27 tasks; done items closed).
   Phase 6: issues #42–#61 (`GLMCP-014`…`021`).
-- Authored Phase 6 from
-  https://docs.gitlab.com/user/model_context_protocol/mcp_server_tools/ —
-  missing tools plus alignment of existing MR surface.
 
 *Last updated: 2026-08-09*
