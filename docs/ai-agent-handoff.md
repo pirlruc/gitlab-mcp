@@ -51,9 +51,9 @@ docker buildx build --load -t gitlab-mcp:local .
   not overwrite it — the multi-ecosystem config is safe across syncs.
 - DHI pulls need `docker login dhi.io` locally and Hub secrets in CI
   (`DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`) — Community is free; auth is still
-  required. Workflows pin `containerdevops@194b06b` and pass matching
+  required. Workflows pin `containerdevops@bad34dd` and pass matching
   `scripts_ref` plus `CONTAINERDEVOPS_READ_TOKEN` as `checkout_token`
-  (private-repo script checkout).
+  (private-repo script checkout). Scan uses `pkg_types: library` for DHI.
 - Runtime has no shell; structure tests use absolute paths under `/app/.venv`.
 - Signing/provenance deferred while private — see `docs/guardrail-deviations.yml`.
 - Dependabot multi-ecosystem **accepted form (local validation 2026-08-08):** `schedule`
@@ -74,7 +74,7 @@ docker buildx build --load -t gitlab-mcp:local .
 ## Recent history
 
 - Container CI: private checkout via `checkout_token` + `scripts_ref`; pin
-  `containerdevops@194b06b`. Root `trivy.yaml` gates on library packages
-  (DHI OS noise deferred to Scout/VEX).
+  `containerdevops@bad34dd`. Scan passes `pkg_types: library` (DHI OS noise
+  deferred to Scout/VEX); root `trivy.yaml` sets `ignore-unfixed`.
 
 *Last updated: 2026-08-09*

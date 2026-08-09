@@ -1,5 +1,5 @@
 ---
-# Thin caller — pinned to containerdevops@194b06b (checkout_token + scripts_ref).
+# Thin caller — pinned to containerdevops@bad34dd (checkout_token + scripts_ref + pkg_types).
 name: Container
 
 on:
@@ -20,10 +20,10 @@ permissions:
 
 jobs:
   lint:
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@194b06bf3504775065714c79f52a991fe052cf62
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@bad34ddd87720eaa57021f862a22b3787fed4370
     with:
       dockerfile: Dockerfile
-      scripts_ref: 194b06bf3504775065714c79f52a991fe052cf62
+      scripts_ref: bad34ddd87720eaa57021f862a22b3787fed4370
       # Push/PR to main: blocking. Manual dispatch: respect the input.
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
@@ -31,13 +31,13 @@ jobs:
 
   build:
     needs: lint
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@194b06bf3504775065714c79f52a991fe052cf62
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@bad34ddd87720eaa57021f862a22b3787fed4370
     with:
       context: .
       dockerfile: Dockerfile
       image_name: gitlab-mcp:ci
       structure_test_config: container-structure-test.yml
-      scripts_ref: 194b06bf3504775065714c79f52a991fe052cf62
+      scripts_ref: bad34ddd87720eaa57021f862a22b3787fed4370
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       dhi_login: true
     secrets:
@@ -47,11 +47,12 @@ jobs:
 
   scan:
     needs: build
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@194b06bf3504775065714c79f52a991fe052cf62
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@bad34ddd87720eaa57021f862a22b3787fed4370
     with:
       image: gitlab-mcp:ci
       image_artifact: container-image
-      scripts_ref: 194b06bf3504775065714c79f52a991fe052cf62
+      scripts_ref: bad34ddd87720eaa57021f862a22b3787fed4370
+      pkg_types: library
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
