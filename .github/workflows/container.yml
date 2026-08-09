@@ -1,8 +1,12 @@
 ---
-# Thin caller — pinned to containerdevops@230be8e (dhi_login input).
+# Thin caller — pinned to containerdevops@4185836 (checkout_token + scripts_ref + pkg_types).
 name: Container
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       blocking:
@@ -16,29 +20,43 @@ permissions:
 
 jobs:
   lint:
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
+    # Fork PRs do not receive repository secrets (CONTAINERDEVOPS_READ_TOKEN / DOCKERHUB_*).
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
     with:
       dockerfile: Dockerfile
-      blocking: ${{ inputs.blocking }}
+      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      # Push/PR to main: blocking. Manual dispatch: respect the input.
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build:
     needs: lint
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
     with:
       context: .
       dockerfile: Dockerfile
       image_name: gitlab-mcp:ci
       structure_test_config: container-structure-test.yml
-      blocking: ${{ inputs.blocking }}
+      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       dhi_login: true
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan:
     needs: build
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@230be8e16682b8d78d19f56bad17bbdf7c41538d
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
     with:
       image: gitlab-mcp:ci
       image_artifact: container-image
-      blocking: ${{ inputs.blocking }}
+      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      pkg_types: library
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

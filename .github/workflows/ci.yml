@@ -148,4 +148,4 @@ jobs:
           pip install semgrep==1.159.0
           semgrep --config p/python --quiet --error src
       - name: Dependency audit (uv)
-        run: uv audit --preview-features audit || uv audit
+        run: uv audit --preview-features audit-command || uv audit

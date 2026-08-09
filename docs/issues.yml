@@ -7,7 +7,7 @@ milestones:
   - name: Phase 1 — Foundation
     epics:
       - id: GLMCP-001
-        status: open
+        status: done
         title: Repository foundation (scaffold, uv, CI)
         overview:
           problem: >-
@@ -33,7 +33,7 @@ milestones:
           - CI-008
         tasks:
           - id: GLMCP-001-T1
-            status: open
+            status: done
             title: Add guardrails and github-scaffold submodules
             instructions:
               files:
@@ -45,7 +45,7 @@ milestones:
             guardrail_refs:
               - PY-RUN-001
           - id: GLMCP-001-T2
-            status: open
+            status: done
             title: Author pyproject, pre-commit, and five-job CI
             instructions:
               files:
@@ -58,7 +58,7 @@ milestones:
               - CI-006
 
       - id: GLMCP-002
-        status: open
+        status: done
         title: Quality gate enforcement (radon, coverage 95, Google docs)
         overview:
           problem: >-
@@ -80,7 +80,7 @@ milestones:
           - CI-009
         tasks:
           - id: GLMCP-002-T1
-            status: open
+            status: done
             title: Implement radon quality_gates.py
             instructions:
               files:
@@ -93,7 +93,7 @@ milestones:
   - name: Phase 2 — Read tools
     epics:
       - id: GLMCP-003
-        status: open
+        status: done
         title: GitLab REST client
         overview:
           problem: Tools need a shared HTTP client with pagination and redaction.
@@ -111,7 +111,7 @@ milestones:
           - PY-SEC-002
         tasks:
           - id: GLMCP-003-T1
-            status: open
+            status: done
             title: Implement client, config, and errors
             instructions:
               files:
@@ -122,7 +122,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-004
-        status: open
+        status: done
         title: Merge request read tools
         overview:
           problem: Agents need list/search/get/diffs/commits/versions.
@@ -139,7 +139,7 @@ milestones:
           - PY-TEST-002
         tasks:
           - id: GLMCP-004-T1
-            status: open
+            status: done
             title: Implement MR list search get and diffs
             instructions:
               files:
@@ -151,7 +151,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-005
-        status: open
+        status: done
         title: Context read tools
         overview:
           problem: Discussions, pipelines, approvals, participants, reviewers needed.
@@ -167,7 +167,7 @@ milestones:
           - PY-TEST-001
         tasks:
           - id: GLMCP-005-T1
-            status: open
+            status: done
             title: Implement discussions and pipelines tools
             instructions:
               files:
@@ -181,7 +181,7 @@ milestones:
   - name: Phase 3 — Write tools
     epics:
       - id: GLMCP-006
-        status: open
+        status: done
         title: Thread write tools
         overview:
           problem: Agents need to reply and resolve review threads.
@@ -196,7 +196,7 @@ milestones:
           - PY-TEST-001
         tasks:
           - id: GLMCP-006-T1
-            status: open
+            status: done
             title: Implement thread create reply resolve
             instructions:
               files:
@@ -207,7 +207,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-007
-        status: open
+        status: done
         title: Update tool and write safety
         overview:
           problem: Updates must not allow close/merge via prompt injection.
@@ -224,7 +224,7 @@ milestones:
           - PY-SEC-002
         tasks:
           - id: GLMCP-007-T1
-            status: open
+            status: done
             title: Implement allowlisted update_merge_request
             instructions:
               files:
@@ -235,7 +235,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-008
-        status: open
+        status: done
         title: Documentation and release
         overview:
           problem: Operators need configuration and tool docs plus release flow.
@@ -254,7 +254,7 @@ milestones:
           - PY-API-001
         tasks:
           - id: GLMCP-008-T1
-            status: open
+            status: done
             title: Author docs and release workflow
             instructions:
               files:
@@ -361,3 +361,512 @@ milestones:
               - bash scripts/check-ci-local.sh
             guardrail_refs:
               - PY-CPLX-002
+
+  - name: Phase 5 — Supply chain parity
+    epics:
+      - id: GLMCP-011
+        status: open
+        title: Wheel and sdist SBOM, provenance, and signing
+        overview:
+          problem: >-
+            The same release tag publishes a container with SBOM, cosign
+            signing, and SLSA provenance, while the wheel and sdist land
+            unsigned with no SBOM — sign: is passed only to the container job.
+          goal: >-
+            Python artifacts reach supply-chain parity with the container
+            built from the same tag (SBOM, provenance attestation, signing).
+        architecture:
+          target: .github/workflows/release.yml github-release job
+          modules:
+            - .github/workflows/release.yml
+            - docs/guardrail-deviations.yml
+        acceptance_criteria:
+          - Release workflow emits SBOM for dist/* (CycloneDX or SPDX)
+          - Provenance attestation attached for wheel/sdist when public
+          - Documented mechanism (e.g. pypa/gh-action-pypi-publish attestations)
+        guardrail_refs:
+          - SC-DEP-001
+          - DOCKER-SEC-002
+          - DOCKER-SEC-003
+          - DOCKER-SEC-004
+        tasks:
+          - id: GLMCP-011-T1
+            status: open
+            title: Add SBOM and attestation steps to github-release job
+            instructions:
+              files:
+                - .github/workflows/release.yml
+            verification:
+              - >-
+                Release workflow documents or runs SBOM generation and
+                provenance for dist artifacts
+            guardrail_refs:
+              - DOCKER-SEC-002
+
+      - id: GLMCP-012
+        status: open
+        title: Confirm Dependabot multi-ecosystem Insights after merge
+        overview:
+          problem: >-
+            The pilot .github/dependabot.yml uses a monthly all-dependencies
+            multi-ecosystem group (SC-DEP-*), but GitHub Insights only validates
+            grouping once the config is on the default branch. Local YAML shape
+            is necessary but not sufficient.
+          goal: >-
+            After merge to main, trigger or wait for a Dependabot run and confirm
+            Insights shows a single grouped PR covering uv, github-actions,
+            pre-commit, and docker ecosystems; file follow-ups if grouping fails.
+        architecture:
+          target: .github/dependabot.yml and GitHub Dependency graph Insights
+          modules:
+            - .github/dependabot.yml
+            - docs/ai-agent-handoff.md
+        acceptance_criteria:
+          - Config on default branch matches SC-DEP-001/002/003
+          - Insights → Dependabot confirms one multi-ecosystem group PR (or documented GitHub limitation)
+          - Handoff records the confirmation outcome for other repos' rollout
+        guardrail_refs:
+          - SC-DEP-001
+          - SC-DEP-002
+          - SC-DEP-003
+        tasks:
+          - id: GLMCP-012-T1
+            status: open
+            title: Verify Insights multi-ecosystem group on main
+            instructions:
+              files:
+                - .github/dependabot.yml
+                - docs/ai-agent-handoff.md
+            verification:
+              - >-
+                After merge, Insights Dependency graph Dependabot shows the
+                all-dependencies group spanning configured ecosystems
+            guardrail_refs:
+              - SC-DEP-001
+              - SC-DEP-003
+
+  - name: Continuous improvement
+    epics:
+      - id: GLMCP-013
+        status: open
+        title: Review for improvements, bugs, and design flaws
+        overview:
+          problem: >-
+            Backlog and automation can drift toward process or docs hygiene only.
+            The repo needs a deliberate review of the current implementation that
+            surfaces improvements, bugs, and design flaws — not only polish — and
+            records material follow-ups in docs/issues.yml.
+          goal: >-
+            Run an ai-reviewer (or equivalent) pass against this repository's
+            current code, workflows, scripts, and docs; append only material new
+            epics/tasks under Continuous improvement (or record a justified no-op).
+        architecture:
+          target: Repository review into docs/issues.yml
+          modules:
+            - docs/issues.yml
+            - docs/ai-agent-handoff.md
+        acceptance_criteria:
+          - Review explicitly covers improvements, bugs, and design flaws in shipped implementation
+          - Material findings appended to docs/issues.yml via PR (budget at most 2 epics / 6 tasks) or handoff records justified no-op
+          - Does not re-file work already covered by existing epic/task ids
+        tasks:
+          - id: GLMCP-013-T1
+            status: open
+            title: Run review pass and append material issues.yml findings
+            instructions:
+              files:
+                - docs/issues.yml
+                - docs/ai-agent-handoff.md
+            verification:
+              - PR appends material findings within budget, or handoff records justified no-op
+
+  - name: Phase 6 — Official MCP tool parity
+    epics:
+      - id: GLMCP-014
+        status: open
+        title: Align existing MR tools with GitLab official MCP surface
+        overview:
+          problem: >-
+            GitLab's documented MCP tools
+            (https://docs.gitlab.com/user/model_context_protocol/mcp_server_tools/)
+            use different names and parameters than this server's MR surface
+            (e.g. list_merge_request_commits vs get_merge_request_commits,
+            discussion threads vs create_merge_request_note / get_merge_request_notes,
+            no url or include facets on get_merge_request, assignee_id vs
+            assignee_username, page vs cursor pagination). Agents trained on the
+            official surface cannot call this server without remapping.
+          goal: >-
+            Bring existing read/write MR tools into name and parameter parity with
+            the official beta tools where the REST API on Free self-hosted supports
+            it; keep valuable extensions (diff versions, resolve thread, approvals)
+            as additive tools; expose get_mcp_server_version.
+        architecture:
+          target: src/gitlab_mcp/server.py and tools package
+          modules:
+            - src/gitlab_mcp/server.py
+            - src/gitlab_mcp/tools/merge_requests.py
+            - src/gitlab_mcp/tools/diffs.py
+            - src/gitlab_mcp/tools/discussions.py
+            - docs/tools.md
+        acceptance_criteria:
+          - Official-compatible aliases or renames for get_merge_request_commits, get_merge_request_pipelines, notes tools
+          - get_merge_request accepts url or project_id+iid and optional include facet (one of diffs|commits|notes|pipelines|discussions)
+          - list_merge_requests supports assignee_username and documents cursor vs page pagination choice
+          - get_mcp_server_version returns the package version
+          - docs/tools.md maps each shipped tool to the official name (or marks as extension)
+        guardrail_refs:
+          - PY-API-001
+          - PY-DOC-001
+          - PY-TEST-002
+        tasks:
+          - id: GLMCP-014-T1
+            status: open
+            title: Add get_mcp_server_version and official MR tool aliases
+            instructions:
+              files:
+                - src/gitlab_mcp/server.py
+                - src/gitlab_mcp/__init__.py
+                - docs/tools.md
+            verification:
+              - uv run pytest tests/test_server.py
+              - docs/tools.md lists official-name aliases
+            guardrail_refs:
+              - PY-API-001
+          - id: GLMCP-014-T2
+            status: open
+            title: Align get/list MR parameters with official MCP (url, include, filters)
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/merge_requests.py
+                - src/gitlab_mcp/models.py
+                - src/gitlab_mcp/server.py
+                - tests/test_merge_requests.py
+            verification:
+              - uv run pytest tests/test_merge_requests.py
+            guardrail_refs:
+              - PY-TEST-002
+          - id: GLMCP-014-T3
+            status: open
+            title: Add create_merge_request_note and get_merge_request_notes parity
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/discussions.py
+                - src/gitlab_mcp/server.py
+                - tests/test_discussions.py
+                - docs/tools.md
+            verification:
+              - uv run pytest tests/test_discussions.py
+              - Thread resolve remains available as an extension tool
+            guardrail_refs:
+              - PY-API-001
+
+      - id: GLMCP-015
+        status: open
+        title: Add create_issue and get_issue tools
+        overview:
+          problem: >-
+            Official MCP exposes create_issue and get_issue; this server is MR-only
+            and cannot create or read project issues that agents need for triage.
+          goal: >-
+            Ship create_issue and get_issue against the GitLab Issues REST API with
+            the official parameter shapes (id, title, description, assignee_ids,
+            milestone_id, labels, confidential, epic_id where the tier allows),
+            gated by GITLAB_READ_ONLY for writes.
+        architecture:
+          target: src/gitlab_mcp/tools/issues.py
+          modules:
+            - src/gitlab_mcp/tools/issues.py
+            - src/gitlab_mcp/server.py
+            - docs/tools.md
+        acceptance_criteria:
+          - get_issue and create_issue registered with official parameter names
+          - Free-tier epic_id absence degrades without crashing
+          - Write tools omitted when GITLAB_READ_ONLY=1
+          - Unit tests cover happy path and Free-tier degradation
+        guardrail_refs:
+          - PY-SEC-002
+          - PY-TEST-002
+          - PY-API-001
+        tasks:
+          - id: GLMCP-015-T1
+            status: open
+            title: Implement get_issue and create_issue with tests
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/issues.py
+                - src/gitlab_mcp/server.py
+                - tests/test_issues.py
+                - docs/tools.md
+            verification:
+              - uv run pytest tests/test_issues.py tests/test_server.py
+            guardrail_refs:
+              - PY-TEST-002
+
+      - id: GLMCP-016
+        status: open
+        title: Pipeline jobs, job logs, and manage_pipeline
+        overview:
+          problem: >-
+            Official MCP provides get_pipeline_jobs, get_job_log, and manage_pipeline
+            (list/create/retry/cancel/delete/update). This server only lists pipelines
+            attached to an MR and cannot inspect jobs or drive CI.
+          goal: >-
+            Add the three pipeline tools with official parameters; document which
+            manage_pipeline actions remain blocked under the write-safety policy
+            (prefer retry/cancel over delete unless explicitly allowed).
+        architecture:
+          target: src/gitlab_mcp/tools/pipelines.py
+          modules:
+            - src/gitlab_mcp/tools/pipelines.py
+            - src/gitlab_mcp/server.py
+            - docs/tools.md
+        acceptance_criteria:
+          - get_pipeline_jobs and get_job_log return job lists and traces
+          - manage_pipeline supports list and create; retry/cancel when write enabled
+          - Destructive delete requires an explicit allow path or stays documented as unavailable
+          - GITLAB_READ_ONLY omits write-capable manage_pipeline mutations
+        guardrail_refs:
+          - PY-SEC-002
+          - PY-TEST-002
+        tasks:
+          - id: GLMCP-016-T1
+            status: open
+            title: Implement get_pipeline_jobs and get_job_log
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/pipelines.py
+                - src/gitlab_mcp/server.py
+                - tests/test_pipelines.py
+            verification:
+              - uv run pytest tests/test_pipelines.py
+            guardrail_refs:
+              - PY-TEST-002
+          - id: GLMCP-016-T2
+            status: open
+            title: Implement manage_pipeline with write-safety gates
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/pipelines.py
+                - src/gitlab_mcp/server.py
+                - docs/tools.md
+            verification:
+              - uv run pytest tests/test_pipelines.py tests/test_server.py
+              - docs/tools.md states allowed manage_pipeline actions
+            guardrail_refs:
+              - PY-SEC-002
+
+      - id: GLMCP-017
+        status: open
+        title: Work-item notes, linking, and saved views
+        overview:
+          problem: >-
+            Official MCP exposes create_workitem_note, get_workitem_notes,
+            link_work_items, and get_saved_view_work_items. Agents on modern GitLab
+            work with work items, not only classic issues/MRs.
+          goal: >-
+            Implement the four work-item tools via REST/GraphQL as available on the
+            configured instance; degrade clearly on Free/self-hosted builds that lack
+            Premium link types or saved views.
+        architecture:
+          target: src/gitlab_mcp/tools/work_items.py
+          modules:
+            - src/gitlab_mcp/tools/work_items.py
+            - src/gitlab_mcp/server.py
+            - docs/tools.md
+        acceptance_criteria:
+          - Notes create/list match official url/group_id/project_id/work_item_iid shape
+          - link_work_items supports relates_to; blocks/blocked_by degrade with a typed error on Free
+          - get_saved_view_work_items returns items or a clear unsupported response
+        guardrail_refs:
+          - PY-API-001
+          - PY-TEST-001
+        tasks:
+          - id: GLMCP-017-T1
+            status: open
+            title: Implement work-item note tools
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/work_items.py
+                - src/gitlab_mcp/server.py
+                - tests/test_work_items.py
+            verification:
+              - uv run pytest tests/test_work_items.py
+            guardrail_refs:
+              - PY-TEST-001
+          - id: GLMCP-017-T2
+            status: open
+            title: Implement link_work_items and get_saved_view_work_items
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/work_items.py
+                - docs/tools.md
+            verification:
+              - uv run pytest tests/test_work_items.py
+              - Free-tier degradation covered by tests
+            guardrail_refs:
+              - PY-API-001
+
+      - id: GLMCP-018
+        status: open
+        title: Multi-scope search and search_labels
+        overview:
+          problem: >-
+            Official search covers instance/group/project scopes beyond merge_requests
+            (work_items, projects, etc.) and search_labels is absent here; only
+            search_merge_requests exists.
+          goal: >-
+            Replace or wrap search_merge_requests with official search (scope + search
+            + optional group_id/project_id/state/fields/order_by) and add search_labels.
+        architecture:
+          target: src/gitlab_mcp/tools/search.py
+          modules:
+            - src/gitlab_mcp/tools/search.py
+            - src/gitlab_mcp/tools/merge_requests.py
+            - src/gitlab_mcp/server.py
+            - docs/tools.md
+        acceptance_criteria:
+          - search tool matches official parameter names; search_merge_requests kept as thin alias or documented migration
+          - search_labels filters project or group labels by title
+          - Pagination parameters (page/per_page) honored under existing client caps
+        guardrail_refs:
+          - PY-API-001
+          - PY-TEST-002
+        tasks:
+          - id: GLMCP-018-T1
+            status: open
+            title: Implement multi-scope search and search_labels
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/search.py
+                - src/gitlab_mcp/server.py
+                - tests/test_search.py
+                - docs/tools.md
+            verification:
+              - uv run pytest tests/test_search.py
+            guardrail_refs:
+              - PY-TEST-002
+
+      - id: GLMCP-019
+        status: open
+        title: Add list_wiki_pages tool
+        overview:
+          problem: >-
+            Official MCP lists wiki pages for a project or group; agents cannot discover
+            wiki content through this server today.
+          goal: >-
+            Implement list_wiki_pages with project_id XOR group_id and cursor pagination
+            (first/after) matching the official tool.
+        architecture:
+          target: src/gitlab_mcp/tools/wiki.py
+          modules:
+            - src/gitlab_mcp/tools/wiki.py
+            - src/gitlab_mcp/server.py
+            - docs/tools.md
+        acceptance_criteria:
+          - list_wiki_pages registered; exactly one of project_id or group_id required
+          - Pagination returns end_cursor when more pages exist
+        guardrail_refs:
+          - PY-API-001
+          - PY-TEST-001
+        tasks:
+          - id: GLMCP-019-T1
+            status: open
+            title: Implement list_wiki_pages with tests
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/wiki.py
+                - src/gitlab_mcp/server.py
+                - tests/test_wiki.py
+                - docs/tools.md
+            verification:
+              - uv run pytest tests/test_wiki.py
+            guardrail_refs:
+              - PY-TEST-001
+
+      - id: GLMCP-020
+        status: open
+        title: Decide create_merge_request vs intentional block
+        overview:
+          problem: >-
+            Official MCP includes create_merge_request (with assignees, reviewers,
+            labels, milestone). This server documents create/merge/close as explicitly
+            unavailable for Free-tier agent safety. Leaving the gap unrecorded forces
+            every agent to discover the mismatch at runtime.
+          goal: >-
+            Record the product decision: either implement create_merge_request with the
+            official parameters under write gating (still no merge/close), or keep the
+            block and document official-tool divergence in docs/tools.md with a stable
+            "unavailable" error shape agents can detect.
+        architecture:
+          target: docs/tools.md and optionally src/gitlab_mcp/tools/writes.py
+          modules:
+            - docs/tools.md
+            - src/gitlab_mcp/tools/writes.py
+            - src/gitlab_mcp/server.py
+            - README.md
+        acceptance_criteria:
+          - Epic body states the chosen path (implement or permanent block)
+          - If implement: tool matches official params; merge/close remain unavailable
+          - If block: docs/tools.md lists create_merge_request under Explicitly unavailable with rationale
+          - README Features table updated to match the decision
+        guardrail_refs:
+          - PY-SEC-002
+          - PY-DOC-001
+        tasks:
+          - id: GLMCP-020-T1
+            status: open
+            title: Implement create_merge_request or document permanent unavailability
+            instructions:
+              files:
+                - docs/tools.md
+                - README.md
+                - src/gitlab_mcp/tools/writes.py
+                - src/gitlab_mcp/server.py
+            verification:
+              - docs/tools.md reflects the decision
+              - If implemented, uv run pytest covers create path and read-only omission
+            guardrail_refs:
+              - PY-SEC-002
+
+      - id: GLMCP-021
+        status: open
+        title: Optional Duo and security tools (semantic search, scan profiles)
+        overview:
+          problem: >-
+            Official MCP ships semantic_code_search (Duo add-on) and
+            attach_scan_profile. Self-hosted Free instances typically lack these;
+            silent omission without stubs confuses agents comparing tool lists.
+          goal: >-
+            Either implement behind capability detection / clear unsupported errors,
+            or register documented stub tools that return a structured "unavailable on
+            this instance" response so the tool list matches the official catalog.
+        architecture:
+          target: src/gitlab_mcp/tools/optional.py
+          modules:
+            - src/gitlab_mcp/tools/optional.py
+            - src/gitlab_mcp/server.py
+            - docs/tools.md
+            - docs/configuration.md
+        acceptance_criteria:
+          - semantic_code_search and attach_scan_profile either work when the instance supports them or return a typed unsupported error
+          - Configuration docs state Duo/security prerequisites
+          - Tools appear in docs/tools.md with tier notes
+        guardrail_refs:
+          - PY-API-001
+          - PY-DOC-001
+        tasks:
+          - id: GLMCP-021-T1
+            status: open
+            title: Add semantic_code_search and attach_scan_profile with capability gating
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/optional.py
+                - src/gitlab_mcp/server.py
+                - docs/tools.md
+                - docs/configuration.md
+                - tests/test_optional.py
+            verification:
+              - uv run pytest tests/test_optional.py
+              - Unsupported path covered without requiring Duo
+            guardrail_refs:
+              - PY-API-001

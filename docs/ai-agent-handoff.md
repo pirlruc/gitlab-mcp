@@ -12,6 +12,9 @@
 | Docs / release (GLMCP-008) | Done |
 | Container image (GLMCP-009) | In progress — DHI Python base; pin digests after `docker login dhi.io` |
 | Guardrails realign (GLMCP-010) | In progress — MI avg 60; note/rule removed |
+| Supply-chain parity (GLMCP-011) | Open — wheel/sdist SBOM + provenance vs container |
+| Dependabot Insights (GLMCP-012) | Open — confirm multi-ecosystem group after merge to main |
+| Official MCP parity (GLMCP-014…021) | Open — authored from GitLab MCP tools docs; not implemented yet |
 
 ## Commands
 
@@ -34,28 +37,56 @@ docker buildx build --load -t gitlab-mcp:local .
 - `docs/docker-hub.md` — Hub Overview: pull, run, env vars, Cursor config
 - `docs/docker.md` — maintainer build/hardening, DHI, registry coordinates
 - `scripts/quality_gates.py` — radon CC/MI gates
-- `docs/issues.yml` — authored backlog (GLMCP-001…010)
-- `docs/guardrails/` — submodule (bump after guardrails python/docker pack merges)
-- `.github/scaffold/` — submodule @ `db1ae34`
+- `docs/issues.yml` — authored backlog (GLMCP-001…021); 001–008 marked `done`
+- `docs/guardrails/` — submodule @ `c43e347` (includes `supply-chain/` / `SC-DEP-*`)
+- `.github/scaffold/` — submodule @ `7435f1d` (`dependency-updates.mdc` + Dependabot seed_once)
+- `.github/dependabot.yml` — multi-ecosystem `all-dependencies` group, monthly (SC-DEP-*)
 
 ## Known pitfalls
 
 - uv is not on host PATH; use `.tools/uv` (project-local binary, gitignored).
 - System Python may be 3.14 without `python3-venv`; uv manages 3.13.
+- `requires-python` is `>=3.13,<3.15` so the lock resolves only for supported CPythons.
 - MCP SDK v2: `FastMCP` → `MCPServer` (`mcp.server.mcpserver`).
 - `GITLAB_READ_ONLY=1` omits write tools from `tools/list`.
-- `sync-templates.sh` overwrites `.github/dependabot.yml` with the scaffold
-  github-actions-only template; restore uv + pre-commit + docker ecosystems after sync.
+- After scaffold bump, `sync-templates.sh` **seeds** `.github/dependabot.yml` once and does
+  not overwrite it — the multi-ecosystem config is safe across syncs.
 - DHI pulls need `docker login dhi.io` locally and Hub secrets in CI
   (`DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`) — Community is free; auth is still
-  required. Workflows pin `containerdevops@230be8e` (dhi.io login step).
+  required. Container CI and Release `container-publish` pin
+  `containerdevops@4185836` with matching `scripts_ref`, plus
+  `CONTAINERDEVOPS_READ_TOKEN` as `checkout_token` (private-repo script
+  checkout). Scan passes `pkg_types: library`; `trivy.yaml` sets
+  `ignore-unfixed` only. Container jobs skip fork PRs (no secrets).
 - Runtime has no shell; structure tests use absolute paths under `/app/.venv`.
 - Signing/provenance deferred while private — see `docs/guardrail-deviations.yml`.
+- Dependabot multi-ecosystem **accepted form (local validation 2026-08-08):** `schedule`
+  and `commit-message` only under `multi-ecosystem-groups`; each `updates` entry has
+  `patterns: ["*"]` and `multi-ecosystem-group: all-dependencies` and **no** per-ecosystem
+  `schedule` or `groups:`. Matches GitHub multi-ecosystem docs. Confirm under
+  Insights → Dependency graph → Dependabot after the config lands on the default branch.
+- CI security job failed on this branch when `cryptography` 49.0.0 hit GHSA-g6cj-pr64-35w5;
+  lockfile bumps to 50.0.0. Container workflow now also runs on `push`/`pull_request` to
+  `main` (blocking); `workflow_dispatch` still respects the blocking input.
 
 ## Suggested next work
 
-1. Merge [containerdevops#14](https://github.com/pirlruc/containerdevops/pull/14); re-pin to `main` SHA.
-2. Confirm Hub secrets on the repo; exercise container workflow.
-3. Land guardrails PR; bump `docs/guardrails` submodule.
+1. Confirm PR #13 CI still green after review + issues commits.
+2. Implement Phase 6 starting with [GLMCP-014](https://github.com/pirlruc/gitlab-mcp/issues/42) (official MR surface alignment).
+3. After merge: [GLMCP-012](https://github.com/pirlruc/gitlab-mcp/issues/38) Insights confirmation for Dependabot.
+4. Decide [GLMCP-020](https://github.com/pirlruc/gitlab-mcp/issues/58) (create_merge_request vs permanent block); then GLMCP-011 supply-chain parity.
 
-*Last updated: 2026-07-30*
+## Recent history
+
+- Synced full `docs/issues.yml` to GitHub (21 epics / 27 tasks; done items closed).
+  Phase 6: issues #42–#61 (`GLMCP-014`…`021`).
+- Authored Phase 6 from
+  https://docs.gitlab.com/user/model_context_protocol/mcp_server_tools/ —
+  missing tools plus alignment of existing MR surface.
+- Addressed Copilot/Qodo review: docs/trivy policy wording, release pin parity,
+  fork-PR Container skip, uv audit fallback.
+- Container CI: private checkout via `checkout_token` + `scripts_ref`; pin
+  `containerdevops@4185836`. Scan passes `pkg_types: library`; root
+  `trivy.yaml` sets `ignore-unfixed`.
+
+*Last updated: 2026-08-09*
