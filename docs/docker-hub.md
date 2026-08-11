@@ -22,18 +22,42 @@ container `HEALTHCHECK`.
 
 ### Tags
 
+GitHub releases use a leading `v` (e.g. [`v0.1.0`](https://github.com/pirlruc/gitlab-mcp/releases/tag/v0.1.0)).
+Published OCI tags drop that prefix via semver metadata:
+
 | Tag | Meaning |
 |-----|---------|
-| `0.1.0` | Immutable release (example; use a semver tag) |
+| `0.1.0` | Immutable image for GitHub release `v0.1.0` |
 | `0.1` | Latest patch in the `0.1` line |
-| `latest` | Latest release on the default branch publish |
+| `latest` | Latest non-prerelease publish (also used on default-branch publishes) |
 | `sha-<git>` | Exact git SHA of the published commit |
 
-Prefer a version tag (or digest) in production.
+Prefer a digest (or a version tag) in production. Resolve the digest after pull:
 
 ```bash
 docker pull pirlruc/gitlab-mcp:0.1.0
+docker image inspect --format '{{index .RepoDigests 0}}' pirlruc/gitlab-mcp:0.1.0
+# then pin: pirlruc/gitlab-mcp@sha256:…
 ```
+
+### Access
+
+The Docker Hub page and the GHCR package may still be **private**. Pulls and the
+Hub overview can require authentication (and org/package access) until the image
+is made public. Log in first (`docker login` / `docker login ghcr.io`), then pull
+by digest when you can.
+
+### Signing, provenance, and SBOM
+
+While the GitHub repository is private on a non–Enterprise Cloud plan, **image
+signing and SLSA provenance attestations are not published** for this image
+(deferred; see [docker.md](docker.md) and `docs/guardrail-deviations.yml`). The
+publish workflow turns signing on when the repository is public.
+
+SBOM output from the container **scan** workflow may still exist for a given
+build. For a specific release, check the [GitHub release assets](https://github.com/pirlruc/gitlab-mcp/releases)
+and any GHCR package attestations rather than assuming cosign signatures or
+provenance are attached to the Hub/GHCR tags today.
 
 ## Quick start
 
