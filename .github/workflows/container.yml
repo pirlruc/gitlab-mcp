@@ -26,7 +26,7 @@ jobs:
       github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@02ef7dd3077c57e4a6d04bbd5e207ce6a27b48bb
     with:
       dockerfile: Dockerfile
       scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
@@ -41,7 +41,7 @@ jobs:
       github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@02ef7dd3077c57e4a6d04bbd5e207ce6a27b48bb
     with:
       context: .
       dockerfile: Dockerfile
@@ -61,7 +61,7 @@ jobs:
       github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@02ef7dd3077c57e4a6d04bbd5e207ce6a27b48bb
     with:
       image: gitlab-mcp:ci
       image_artifact: container-image
