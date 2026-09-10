@@ -3,7 +3,8 @@
 stdio [MCP](https://modelcontextprotocol.io/) server for **self-hosted GitLab**
 merge requests: list, search, and read MRs plus safe updates (thread replies,
 description/labels). Creating, merging, and closing MRs is intentionally
-unavailable — suitable for GitLab 18.6 Free, which has no built-in MCP server.
+unavailable — verified against GitLab CE **18.11.11** (self-hosted Free; no
+built-in MCP server). The client is `/api/v4` generic and is not version-gated.
 
 **Repository:** [pirlruc/gitlab-mcp](https://github.com/pirlruc/gitlab-mcp)
 
