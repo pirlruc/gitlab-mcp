@@ -100,6 +100,9 @@ docker buildx build --load -t gitlab-mcp:local .
   `registries:` for git / dhi.io.
 - Merged [PR #13](https://github.com/pirlruc/gitlab-mcp/pull/13) to `main`:
   multi-ecosystem Dependabot, container CI fixes, Phase 6 backlog.
+- 2026-09-10: Floor `httpx2>=2.12.0` and `httpcore2>=2.10.0` so `uv audit` and
+  the image Trivy scan clear CVE-2026-84378…84382 (mcp 2.0.0 still resolved
+  2.9.1 without a floor).
 - 2026-09-10: `scripts/smoke.py` now exercises every MCP tool. Verified against
   local GitLab CE **18.11.11** from [gitlab-server](https://github.com/pirlruc/gitlab-server)
   (`local/smoke`); README 18.6 claim updated.
