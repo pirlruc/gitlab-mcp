@@ -1,7 +1,7 @@
 # Authored backlog for gitlab-mcp.
 #
 # Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
-# Methodology: https://github.com/pirlruc/methodologies/tree/1.1.0/github-issue-adr
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.3.0/github-issue-adr
 
 milestones:
   - name: Phase 1 — Foundation

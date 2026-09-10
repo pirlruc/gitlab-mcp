@@ -38,8 +38,8 @@ docker buildx build --load -t gitlab-mcp:local .
 - `docs/docker.md` — maintainer build/hardening, DHI, registry coordinates
 - `scripts/quality_gates.py` — radon CC/MI gates
 - `docs/issues.yml` — authored backlog (GLMCP-001…021); 001–008 marked `done`
-- `docs/guardrails/` — submodule @ `c43e347` (includes `supply-chain/` / `SC-DEP-*`)
-- `.github/scaffold/` — submodule @ `7435f1d` (`dependency-updates.mdc` + Dependabot seed_once)
+- `docs/guardrails/` — submodule @ guardrails tag `1.4.0`
+- `.github/scaffold/` — submodule @ github-scaffold tag `1.3.0`
 - `.github/dependabot.yml` — multi-ecosystem `all-dependencies` group, monthly (SC-DEP-*)
 
 ## Known pitfalls
@@ -106,5 +106,8 @@ docker buildx build --load -t gitlab-mcp:local .
 - 2026-09-10: `scripts/smoke.py` now exercises every MCP tool. Verified against
   local GitLab CE **18.11.11** from [gitlab-server](https://github.com/pirlruc/gitlab-server)
   (`local/smoke`); README 18.6 claim updated.
+- 2026-09-10: Pinned `docs/guardrails` to [guardrails 1.4.0](https://github.com/pirlruc/guardrails/releases/tag/1.4.0)
+  and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
+  synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
 *Last updated: 2026-09-10*
