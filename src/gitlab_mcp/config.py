@@ -46,7 +46,7 @@ def read_secret_file(path: str) -> str:
     except OSError as exc:
         raise ValueError(f"cannot read secret file: {exc.strerror}") from exc
     if mode & 0o077:
-        logger.warning("secret file %s is readable by group or others", path)
+        logger.warning("file %s mode allows group or other access", path)
     secret = text.strip()
     if not secret:
         raise ValueError("secret file is empty")
