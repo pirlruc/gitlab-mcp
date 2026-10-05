@@ -78,7 +78,7 @@ class GitLabClient:
         self._client = httpx.Client(
             base_url=settings.api_base,
             headers={
-                "PRIVATE-TOKEN": settings.gitlab_token,
+                "PRIVATE-TOKEN": settings.gitlab_access_token(),
                 "Accept": "application/json",
             },
             timeout=settings.gitlab_timeout_seconds,
@@ -280,7 +280,7 @@ class GitLabClient:
         try:
             response = self._client.request(method, path, params=params, json=json)
         except httpx.HTTPError as exc:
-            safe = redact_secrets(str(exc), self.settings.gitlab_token)
+            safe = redact_secrets(str(exc), self.settings.gitlab_access_token())
             raise GitLabError(f"HTTP transport error: {safe}") from exc
         if response.is_success:
             return response
@@ -290,7 +290,7 @@ class GitLabClient:
         except ValueError:
             body = None
         error = error_from_status(response.status_code, body)
-        error.message = redact_secrets(error.message, self.settings.gitlab_token)
+        error.message = redact_secrets(error.message, self.settings.gitlab_access_token())
         raise error
 
     @staticmethod

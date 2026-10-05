@@ -480,6 +480,56 @@ milestones:
             verification:
               - PR appends material findings within budget, or handoff records justified no-op
 
+      - id: GLMCP-022
+        status: open
+        title: Serve MCP over streamable HTTP
+        overview:
+          problem: >-
+            The server speaks stdio only. A homelab client on another machine
+            cannot attach, and an open port 3333 would proxy the GitLab token
+            to anyone on the LAN.
+          goal: >-
+            MCP_TRANSPORT=streamable-http listens on port 3333 with a required
+            bearer file, Host and Origin checks, GITLAB_TOKEN_FILE, and
+            GET /healthz. stdio stays the default. SSE is not added.
+        decision: >-
+          In the context of a LAN MCP listener, facing a stdio-only server, we
+          decided streamable HTTP with a file-backed bearer and Host checks,
+          to achieve a remote client without an open token proxy, accepting
+          that SSE is not implemented.
+        out_of_scope:
+          - SSE transport
+          - OAuth login; the bearer secret is static
+        architecture:
+          target: src/gitlab_mcp/http_transport.py
+          modules:
+            - src/gitlab_mcp/config.py
+            - src/gitlab_mcp/http_transport.py
+            - src/gitlab_mcp/server.py
+            - Dockerfile
+        acceptance_criteria:
+          - Default transport remains stdio
+          - HTTP mode refuses to start without MCP_AUTH_TOKEN_FILE and MCP_ALLOWED_HOSTS
+          - GET /healthz does not require the bearer token
+          - A wrong Host is rejected
+        guardrail_refs:
+          - PY-SEC-002
+          - DOCKER-RUN-005
+        tasks:
+          - id: GLMCP-022-T1
+            status: open
+            title: Add streamable HTTP, bearer auth, and healthz
+            instructions:
+              files:
+                - src/gitlab_mcp/http_transport.py
+                - src/gitlab_mcp/config.py
+                - docs/configuration.md
+                - Dockerfile
+            verification:
+              - uv run pytest tests/test_http_transport.py tests/test_config.py
+            guardrail_refs:
+              - PY-SEC-002
+
   - name: Phase 6 — Official MCP tool parity
     epics:
       - id: GLMCP-014

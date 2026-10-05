@@ -8,8 +8,10 @@ build/hardening notes for maintainers live in [docker.md](docker.md).
 self-hosted GitLab. It exposes merge-request tools (list, search, diffs,
 discussions, pipelines, and allowlisted updates) to MCP clients such as Cursor.
 
-The image speaks MCP over **stdin/stdout** only. There is no HTTP port and no
-container `HEALTHCHECK`.
+The default is MCP over **stdin/stdout**. Set `MCP_TRANSPORT=streamable-http`
+to listen on port 3333. That mode requires `MCP_AUTH_TOKEN_FILE` and
+`MCP_ALLOWED_HOSTS`. There is no image `HEALTHCHECK`; probe `GET /healthz`
+when HTTP is enabled.
 
 ## Image
 
@@ -77,7 +79,14 @@ All configuration is via environment variables (no CLI flags for secrets).
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GITLAB_URL` | **yes** | — | GitLab base URL, e.g. `https://gitlab.example.com` |
-| `GITLAB_TOKEN` | **yes** | — | Personal or project access token |
+| `GITLAB_TOKEN` | one of token or file | — | Personal or project access token |
+| `GITLAB_TOKEN_FILE` | one of token or file | — | File containing the GitLab token. Replaces `GITLAB_TOKEN` |
+| `MCP_TRANSPORT` | no | `stdio` | `stdio` or `streamable-http` |
+| `MCP_HTTP_HOST` | no | `127.0.0.1` | HTTP bind address |
+| `MCP_HTTP_PORT` | no | `3333` | HTTP bind port |
+| `MCP_AUTH_TOKEN_FILE` | HTTP only | — | Bearer secret file. Required for HTTP. Not an environment variable |
+| `MCP_ALLOWED_HOSTS` | HTTP only | — | Comma-separated Host values. Required for HTTP |
+| `MCP_ALLOWED_ORIGINS` | no | empty | Comma-separated Origin values |
 | `GITLAB_READ_ONLY` | no | `false` | When `true` / `1`, write tools are not registered |
 | `GITLAB_DEFAULT_PROJECT` | no | — | Default project id or `group/project` path |
 | `GITLAB_TIMEOUT_SECONDS` | no | `30` | HTTP timeout in seconds |

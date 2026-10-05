@@ -1,4 +1,4 @@
-"""MCP stdio server exposing GitLab merge request tools."""
+"""MCP server exposing GitLab merge request tools."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from mcp.server.mcpserver import MCPServer
 
 from gitlab_mcp.client import GitLabClient
 from gitlab_mcp.config import Settings, get_settings
+from gitlab_mcp.http_transport import run_streamable_http
 from gitlab_mcp.models import DiscussionPosition, MergeRequestListFilters
 from gitlab_mcp.tools import diffs, discussions, merge_requests, pipelines, writes
 
@@ -33,19 +34,21 @@ INSTRUCTIONS = (
 def create_server(
     settings: Settings | None = None,
     client: GitLabClient | None = None,
+    **server_kwargs: Any,
 ) -> MCPServer:
     """Build an :class:`MCPServer` with tools registered from settings.
 
     Args:
         settings: Optional settings override (defaults to environment).
         client: Optional HTTP client override (used by tests).
+        **server_kwargs: Extra arguments for :class:`MCPServer` (auth, verifier).
 
     Returns:
-        Configured MCP server ready for ``run(transport='stdio')``.
+        Configured MCP server ready to run.
 
     """
     cfg = settings or get_settings()
-    server = MCPServer("gitlab-mcp", instructions=INSTRUCTIONS)
+    server = MCPServer("gitlab-mcp", instructions=INSTRUCTIONS, **server_kwargs)
     http = client or GitLabClient(cfg)
 
     _register_read_tools(server, http, cfg)
@@ -519,9 +522,12 @@ def _register_write_tools(
 
 
 def main() -> None:
-    """Run the MCP server over stdio."""
-    server = create_server()
-    server.run(transport="stdio")
+    """Run stdio, or streamable HTTP when configured."""
+    settings = get_settings()
+    if settings.mcp_transport == "stdio":
+        create_server(settings).run(transport="stdio")
+        return
+    run_streamable_http(settings, create_server)
 
 
 if __name__ == "__main__":

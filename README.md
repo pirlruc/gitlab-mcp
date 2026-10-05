@@ -1,6 +1,6 @@
 # gitlab-mcp
 
-stdio [MCP](https://modelcontextprotocol.io/) server for **self-hosted GitLab**
+[MCP](https://modelcontextprotocol.io/) server for **self-hosted GitLab**
 merge requests: list, search, and read MRs plus safe updates (thread replies,
 description/labels). Creating, merging, and closing MRs is intentionally
 unavailable — verified against GitLab CE **18.11.11** (self-hosted Free; no

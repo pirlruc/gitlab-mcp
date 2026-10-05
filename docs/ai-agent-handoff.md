@@ -15,6 +15,7 @@
 | Supply-chain parity (GLMCP-011) | Open — wheel/sdist SBOM + provenance vs container |
 | Dependabot Insights (GLMCP-012) | Done — multi-ecosystem `all-dependencies` PR #62 merged; registries + PAT access working |
 | Official MCP parity (GLMCP-014…021) | Open — authored from GitLab MCP tools docs; not implemented yet |
+| Streamable HTTP (GLMCP-022) | Implemented on `feature-gitlab-mcp-http` — bearer file, Host/Origin checks, `/healthz`. Release `0.2.0` after merge. Image publish still needs `docker login dhi.io` |
 
 ## Commands
 
@@ -92,6 +93,9 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Recent history
 
+- 2026-10-05: GLMCP-022 streamable HTTP. `uv audit` still reports PyJWT and
+  virtualenv findings that this change did not introduce. Do not treat that
+  failure as a regression of the HTTP work.
 - Merged [PR #62](https://github.com/pirlruc/gitlab-mcp/pull/62) (`all-dependencies`):
   ruff 0.16.1, coverage 7.15.4, pre-commit 4.6.1, setuptools floor, pre-commit
   hook bumps; fixed ruff property docstrings; local `check-ci-local` + Docker
@@ -110,4 +114,4 @@ docker buildx build --load -t gitlab-mcp:local .
   and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
-*Last updated: 2026-09-10*
+*Last updated: 2026-10-05 (GLMCP-022 streamable HTTP)*

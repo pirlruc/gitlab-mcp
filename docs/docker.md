@@ -62,7 +62,7 @@ Prefer pull-by-digest in deployments (`DOCKER-SEC-006`).
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `GITLAB_URL` | yes | GitLab base URL |
-| `GITLAB_TOKEN` | yes | Access token |
+| `GITLAB_TOKEN` | one of token or file | Access token. `GITLAB_TOKEN_FILE` replaces it |
 | `GITLAB_READ_ONLY` | no | Omit write tools when `true` |
 | `GITLAB_DEFAULT_PROJECT` | no | Default project id/path |
 
@@ -70,8 +70,30 @@ See [configuration.md](configuration.md) for the full table.
 
 ## Recommended run (hardening)
 
-The server speaks MCP over **stdio** only — no published port and **no
-HEALTHCHECK** (`DOCKER-RUN-006`).
+The default transport is **stdio**. There is **no image HEALTHCHECK**
+(`DOCKER-RUN-006`): a stdio container has no port, so a probe would fail the
+common case. `EXPOSE 3333` documents streamable HTTP. In that mode the
+orchestrator probes `GET /healthz`.
+
+```bash
+docker run --rm \
+  --read-only \
+  --cap-drop ALL \
+  --security-opt no-new-privileges \
+  -e GITLAB_URL \
+  -e GITLAB_TOKEN_FILE=/run/secrets/gitlab \
+  -e GITLAB_READ_ONLY=1 \
+  -e MCP_TRANSPORT=streamable-http \
+  -e MCP_HTTP_HOST=127.0.0.1 \
+  -e MCP_AUTH_TOKEN_FILE=/run/secrets/mcp \
+  -e MCP_ALLOWED_HOSTS=127.0.0.1:3333 \
+  -v /path/gitlab-token:/run/secrets/gitlab:ro \
+  -v /path/mcp-token:/run/secrets/mcp:ro \
+  -p 127.0.0.1:3333:3333 \
+  ghcr.io/pirlruc/gitlab-mcp:0.2.0
+```
+
+Stdio (no published port):
 
 ```bash
 docker run --rm -i \

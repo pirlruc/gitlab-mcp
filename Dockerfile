@@ -30,7 +30,7 @@ ARG REVISION=unknown
 ARG SOURCE=https://github.com/pirlruc/gitlab-mcp
 
 LABEL org.opencontainers.image.title="gitlab-mcp" \
-      org.opencontainers.image.description="MCP server for GitLab merge request tools (stdio)" \
+      org.opencontainers.image.description="MCP server for GitLab merge request tools (stdio or streamable HTTP)" \
       org.opencontainers.image.source="${SOURCE}" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.revision="${REVISION}" \
@@ -47,5 +47,8 @@ COPY --from=builder --chown=65532:65532 /app/.venv /app/.venv
 USER 65532:65532
 WORKDIR /app
 
-# Stdio MCP — no EXPOSE, no HEALTHCHECK (DOCKER-RUN-006); documented in docs/docker.md
+# HTTP mode listens on 3333. No image HEALTHCHECK: the default transport is
+# stdio, which has no port. Orchestrators probe GET /healthz in HTTP mode
+# (DOCKER-RUN-006). See docs/docker.md.
+EXPOSE 3333
 ENTRYPOINT ["gitlab-mcp"]

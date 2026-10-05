@@ -43,17 +43,18 @@ def test_get_success(settings: Settings) -> None:
 
 def test_get_not_found(settings: Settings) -> None:
     """404 raises GitLabNotFoundError with redacted message."""
+    token = settings.gitlab_access_token()
 
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(
             404,
-            json={"message": f"missing {settings.gitlab_token}"},
+            json={"message": f"missing {token}"},
         )
 
     with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
         with pytest.raises(GitLabNotFoundError) as exc:
             client.get("/missing")
-    assert settings.gitlab_token not in exc.value.message
+    assert token not in exc.value.message
     assert "***" in exc.value.message
 
 
