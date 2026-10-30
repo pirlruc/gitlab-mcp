@@ -36,7 +36,7 @@ dev = [
   "interrogate>=1.7.0",
   "mypy>=1.20.2",
   "pre-commit==4.6.1",
-  "pylint>=3.0",
+  "pylint>=4.0.9",
   "pytest-cov>=7.0",
   "pytest>=8.0",
   "pyyaml>=6.0",
