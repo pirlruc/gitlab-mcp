@@ -32,8 +32,6 @@ jobs:
       scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
       # Push/PR to main: blocking. Manual dispatch: respect the input.
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-    secrets:
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build:
     needs: lint
@@ -53,7 +51,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan:
     needs: build
@@ -68,5 +65,3 @@ jobs:
       scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
       pkg_types: library
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-    secrets:
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

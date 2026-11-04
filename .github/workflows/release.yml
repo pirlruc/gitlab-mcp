@@ -55,4 +55,3 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

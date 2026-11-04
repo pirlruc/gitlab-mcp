@@ -111,3 +111,4 @@ docker buildx build --load -t gitlab-mcp:local .
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
 *Last updated: 2026-09-10*
+*Last updated: 2026-11-04 — workflows no longer pass COMMONDEVOPS_READ_TOKEN, CONTAINERDEVOPS_READ_TOKEN, or a Dependabot secret as a checkout token. The secrets are still present until they are deleted.*
