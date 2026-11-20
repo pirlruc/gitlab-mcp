@@ -23,12 +23,12 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
     with:
       dockerfiles: |
         Dockerfile
         Dockerfile.alpine
-      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+      scripts_ref: 62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
       blocking: true
       # Nested jobs log into GHCR with the caller token and then cannot see
       # the public ci-lint index. Hadolint still runs on the host.
@@ -41,7 +41,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
     with:
       context: .
       dockerfile: Dockerfile
@@ -49,7 +49,7 @@ jobs:
       artifact_name: gitlab-mcp-debian
       handoff_package: gitlab-mcp
       structure_test_config: container-structure-test.yml
-      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+      scripts_ref: 62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
       blocking: true
       dhi_login: true
       pkg_types: library
@@ -63,7 +63,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
     with:
       context: .
       dockerfile: Dockerfile.alpine
@@ -71,7 +71,7 @@ jobs:
       artifact_name: gitlab-mcp-alpine
       handoff_package: gitlab-mcp
       structure_test_config: container-structure-test.yml
-      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+      scripts_ref: 62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
       blocking: true
       dhi_login: true
       pkg_types: library
@@ -87,11 +87,11 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-debian.outputs.handoff_package, needs.build-debian.outputs.digest) }}
       scanners: vuln,secret
-      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+      scripts_ref: 62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
       pkg_types: library
       results_artifact: scan-debian
       sarif_category: trivy-debian
@@ -105,11 +105,11 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       scanners: vuln,secret
-      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+      scripts_ref: 62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
       pkg_types: library
       results_artifact: scan-alpine
       sarif_category: trivy-alpine
@@ -122,10 +122,10 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
     with:
       image: ghcr.io/pirlruc/gitlab-mcp:latest
-      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
+      scripts_ref: 62f6dcd7848e2b4fac5bc246f47ed7a4bd2de3af
       pkg_types: os,library
       results_artifact: rescan-debian
       sarif_category: trivy-rescan-debian
