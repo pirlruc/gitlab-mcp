@@ -13,10 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # python-quality.yml runs inside ghcr.io/pirlruc/ci-lint. Actions
-  # authenticates that pull, and GHCR hides the public index from a token
-  # whose repository is not on the package access list. The host job is the
-  # same gate as scripts/check-ci-local.sh. Semgrep stays in pydevops.
+  # python-quality.yml also runs inside ghcr.io/pirlruc/ci-python.
+  # ci-lint is on this repository's package access list. ci-python is not:
+  # Actions gets "manifest unknown" for both the 3.6.0 digest and the
+  # public index. The host job is the same gate as scripts/check-ci-local.sh.
   quality:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
