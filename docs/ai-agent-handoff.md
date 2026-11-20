@@ -88,13 +88,15 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Add `DOCKERHUB_DESCRIPTION_TOKEN` (Read, Write, Delete). Hub tags for `0.2.4` exist; the live Overview is still the `0.1.0` page because that secret is unset.
-2. Make the GHCR package `gitlab-mcp` public if anonymous pulls should work. Anonymous `GET` of `0.2.4` returns 401. Docker Hub is public.
-3. Restrict the `release` GitHub Environment to tag pushes.
-4. Add this repository to the Actions access list for `ci-python`. `ci-lint` works. `python-quality` still cannot pull `ci-python`.
+1. Restrict the `release` GitHub Environment to tag pushes.
+2. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
 
 ## Recent history
 
+- 2026-11-20: Quality calls pydevops `python-quality` at 3.6.0
+  (`297fb0f`). `ci-python` is on the package access list. GHCR
+  `gitlab-mcp` stays private. Hub Overview is pushed with
+  `DOCKERHUB_DESCRIPTION_TOKEN`.
 - 2026-11-20: Public image pages name signed `0.2.4` (Debian index
   `sha256:527454bc…`, Alpine `sha256:569c3aab…`). Hub Overview stays on
   the old page until `DOCKERHUB_DESCRIPTION_TOKEN` exists. GHCR
@@ -125,4 +127,4 @@ docker buildx build --load -t gitlab-mcp:local .
   and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
-*Last updated: 2026-11-20 (ci-lint access, CodeQL, secret scanning)*
+*Last updated: 2026-11-20 (python-quality, private GHCR, Hub token)*

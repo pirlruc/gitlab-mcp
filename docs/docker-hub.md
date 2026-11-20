@@ -38,7 +38,7 @@ docker pull pirlruc/gitlab-mcp:0.2.4-alpine
 docker pull pirlruc/gitlab-mcp@sha256:527454bc119b2b20756db609f03533c5b35d5ffe2a0b348f8066253897f4c2b9
 ```
 
-GHCR serves the same tags. The package requires a login:
+GHCR serves the same tags. That package stays private, so a pull needs a token with `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
