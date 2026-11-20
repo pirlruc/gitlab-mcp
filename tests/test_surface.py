@@ -8,6 +8,7 @@ from typing import Any, cast
 import httpx
 import pytest
 
+import gitlab_mcp
 from gitlab_mcp.client import GitLabClient
 from gitlab_mcp.config import Settings
 from gitlab_mcp.server import create_server
@@ -103,7 +104,7 @@ def test_surface_tools(settings: Settings) -> None:
 
     async def run() -> None:
         version = cast(Any, await server.call_tool("get_mcp_server_version", {}))
-        assert version.structured_content["version"] == "0.2.0"
+        assert version.structured_content["version"] == gitlab_mcp.__version__
         for name, arguments in calls.items():
             if name == "get_mcp_server_version":
                 continue
