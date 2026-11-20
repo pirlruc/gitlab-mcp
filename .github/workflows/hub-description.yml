@@ -1,14 +1,11 @@
-# Push the Docker Hub Overview without rebuilding the image.
+# Update the Docker Hub Overview without rebuilding the image.
 # DOCKERHUB_DESCRIPTION_TOKEN needs Read, Write, and Delete on Docker Hub.
+# workflow_dispatch only. The reusable workflow treats a push event as
+# pirlruc/ci-container, so a push from this repository overwrites that page.
 
 name: Hub description
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/docker-hub.md"
-      - ".github/workflows/hub-description.yml"
   workflow_dispatch:
 
 permissions: {}
