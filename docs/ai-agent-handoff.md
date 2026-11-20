@@ -89,8 +89,7 @@ docker buildx build --load -t gitlab-mcp:local .
 ## Suggested next work
 
 1. GLMCP-031: call `python-quality` after pydevops PDO-VENV-001 excludes `.venv` from the static phase.
-2. Restrict the `release` GitHub Environment to tag pushes.
-3. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
+2. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
 
 ## Recent history
 
@@ -129,4 +128,4 @@ docker buildx build --load -t gitlab-mcp:local .
   and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
-*Last updated: 2026-11-20 (GLMCP-031 after PDO-VENV-001)*
+*Last updated: 2026-11-20 (release environment limited to v*.*.* tags)*
