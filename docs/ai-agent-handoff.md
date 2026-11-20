@@ -15,7 +15,7 @@
 | Supply-chain parity (GLMCP-011) | Done — wheel SBOM via pydevops `python-release` |
 | Dependabot Insights (GLMCP-012) | Done — plus `gitsubmodule`, cooldown, and security groups |
 | Official MCP parity (GLMCP-014…020, 023…026) | Done — read toolsets. GLMCP-021 rejected (paid tiers) |
-| Streamable HTTP (GLMCP-022) | Done — bearer file, Host/Origin checks, `/healthz`. Tags `v0.2.0` and `v0.2.1` did not publish images. `v0.2.2` is the publish |
+| Streamable HTTP (GLMCP-022) | Done. Image tags start at `v0.2.3`. `v0.2.0` failed smoke, `v0.2.1` failed the arm64 pull, `v0.2.2` pushed then failed the arm64 structure test before signing |
 
 ## Commands
 
