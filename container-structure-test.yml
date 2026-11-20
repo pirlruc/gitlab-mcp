@@ -13,6 +13,25 @@ commandTests:
     command: "/app/.venv/bin/python"
     args: ["-c", "import gitlab_mcp; print(gitlab_mcp.__name__)"]
     expectedOutput: ["gitlab_mcp"]
+  - name: "no setuid or setgid files"
+    command: "/app/.venv/bin/python"
+    args:
+      - "-c"
+      - |
+        import os, sys
+        bad = []
+        skip = {"proc", "sys", "dev"}
+        for root, dirs, files in os.walk("/"):
+            dirs[:] = [item for item in dirs if item not in skip]
+            for name in files:
+                path = os.path.join(root, name)
+                try:
+                    mode = os.lstat(path).st_mode
+                except OSError:
+                    continue
+                if mode & 0o6000:
+                    bad.append(path)
+        sys.exit(1 if bad else 0)
 fileExistenceTests:
   - name: "gitlab-mcp on PATH venv"
     path: "/app/.venv/bin/gitlab-mcp"

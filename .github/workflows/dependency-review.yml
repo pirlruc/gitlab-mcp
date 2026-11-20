@@ -1,0 +1,16 @@
+name: Dependency review
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  review:
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: pirlruc/commondevops/.github/workflows/common-dependency-review.yml@0e78652fa9f65b9d98033ac82bf9e5308ebb17a7
+    with:
+      fail_on_severity: high

@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from gitlab_mcp.client import GitLabClient
+from gitlab_mcp.client import GitLabClient, encode_path_segment
 from gitlab_mcp.models import FORBIDDEN_UPDATE_FIELDS, MergeRequestUpdateFields
 from gitlab_mcp.tools.merge_requests import mr_base_path
 
@@ -65,3 +65,41 @@ def update_merge_request(
         raise ValueError("No updatable fields provided")
     path = mr_base_path(project_id, merge_request_iid)
     return client.put(path, json=body)
+
+
+def create_merge_request(
+    client: GitLabClient,
+    project_id: str | int,
+    *,
+    source_branch: str,
+    target_branch: str,
+    title: str,
+    description: str | None = None,
+    labels: str | None = None,
+) -> Any:
+    """Create a merge request. Merge and close stay unavailable.
+
+    Args:
+        client: GitLab HTTP client.
+        project_id: Project id or path.
+        source_branch: Source branch name.
+        target_branch: Target branch name.
+        title: Merge request title.
+        description: Optional description.
+        labels: Optional comma-separated labels.
+
+    Returns:
+        Created merge request object.
+
+    """
+    body: dict[str, Any] = {
+        "source_branch": source_branch,
+        "target_branch": target_branch,
+        "title": title,
+    }
+    if description is not None:
+        body["description"] = description
+    if labels is not None:
+        body["labels"] = labels
+    path = f"/projects/{encode_path_segment(project_id)}/merge_requests"
+    return client.post(path, json=body)

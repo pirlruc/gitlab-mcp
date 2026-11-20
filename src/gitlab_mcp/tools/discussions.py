@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from gitlab_mcp.client import GitLabClient
+from gitlab_mcp.client import GitLabClient, encode_path_segment
 from gitlab_mcp.models import DiscussionPosition
 from gitlab_mcp.tools.merge_requests import mr_base_path
 
@@ -13,7 +13,7 @@ def list_merge_request_discussions(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
-) -> list[Any]:
+) -> Any:
     """List discussion threads on a merge request.
 
     Args:
@@ -47,7 +47,8 @@ def get_merge_request_discussion(
         Discussion object.
 
     """
-    path = f"{mr_base_path(project_id, merge_request_iid)}/discussions/{discussion_id}"
+    encoded = encode_path_segment(discussion_id)
+    path = f"{mr_base_path(project_id, merge_request_iid)}/discussions/{encoded}"
     return client.get(path)
 
 
@@ -99,7 +100,8 @@ def reply_to_merge_request_thread(
         Created note object.
 
     """
-    path = f"{mr_base_path(project_id, merge_request_iid)}/discussions/{discussion_id}/notes"
+    encoded = encode_path_segment(discussion_id)
+    path = f"{mr_base_path(project_id, merge_request_iid)}/discussions/{encoded}/notes"
     return client.post(path, json={"body": body})
 
 
@@ -124,5 +126,6 @@ def set_merge_request_thread_resolved(
         Updated discussion object.
 
     """
-    path = f"{mr_base_path(project_id, merge_request_iid)}/discussions/{discussion_id}"
+    encoded = encode_path_segment(discussion_id)
+    path = f"{mr_base_path(project_id, merge_request_iid)}/discussions/{encoded}"
     return client.put(path, params={"resolved": resolved})

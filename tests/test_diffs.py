@@ -24,7 +24,7 @@ def test_diffs_commits_versions(settings: Settings) -> None:
         return httpx.Response(404, json={"message": "no"})
 
     with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
-        assert diffs.get_merge_request_diffs(client, 1, 2)[0]["old_path"] == "a.py"
-        assert diffs.list_merge_request_commits(client, 1, 2)[0]["id"] == "abc"
-        assert diffs.list_merge_request_diff_versions(client, 1, 2)[0]["id"] == 9
+        assert diffs.get_merge_request_diffs(client, 1, 2)["items"][0]["old_path"] == "a.py"
+        assert diffs.list_merge_request_commits(client, 1, 2)["items"][0]["id"] == "abc"
+        assert diffs.list_merge_request_diff_versions(client, 1, 2)["items"][0]["id"] == 9
         assert diffs.get_merge_request_diff_version(client, 1, 2, 9)["id"] == 9

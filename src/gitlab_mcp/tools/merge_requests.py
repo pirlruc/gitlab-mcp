@@ -8,6 +8,32 @@ from gitlab_mcp.client import GitLabClient, encode_path_segment
 from gitlab_mcp.models import MergeRequestListFilters
 
 
+def search_collection_path(
+    project_id: str | int | None,
+    group_id: str | int | None,
+) -> str:
+    """Resolve a search collection for project, group, or instance scope.
+
+    Args:
+        project_id: Optional project scope.
+        group_id: Optional group scope.
+
+    Returns:
+        Relative search path.
+
+    Raises:
+        ValueError: If both project and group are provided.
+
+    """
+    if project_id is not None and group_id is not None:
+        raise ValueError("Provide at most one of project_id or group_id")
+    if project_id is not None:
+        return f"/projects/{encode_path_segment(project_id)}/search"
+    if group_id is not None:
+        return f"/groups/{encode_path_segment(group_id)}/search"
+    return "/search"
+
+
 def _mr_collection_path(
     project_id: str | int | None,
     group_id: str | int | None,
@@ -40,7 +66,7 @@ def list_merge_requests(
     project_id: str | int | None = None,
     group_id: str | int | None = None,
     filters: MergeRequestListFilters | None = None,
-) -> list[Any]:
+) -> Any:
     """List merge requests with optional filters.
 
     Args:
@@ -64,7 +90,7 @@ def search_merge_requests(
     *,
     project_id: str | int | None = None,
     group_id: str | int | None = None,
-) -> list[Any]:
+) -> Any:
     """Search merge requests via the GitLab Search API.
 
     Args:
@@ -76,26 +102,21 @@ def search_merge_requests(
     Returns:
         List of matching merge request search results.
 
-    Raises:
-        ValueError: If both project and group are provided.
-
     """
-    if project_id is not None and group_id is not None:
-        raise ValueError("Provide at most one of project_id or group_id")
     params = {"scope": "merge_requests", "search": query}
-    if project_id is not None:
-        path = f"/projects/{encode_path_segment(project_id)}/search"
-    elif group_id is not None:
-        path = f"/groups/{encode_path_segment(group_id)}/search"
-    else:
-        path = "/search"
+    path = search_collection_path(project_id, group_id)
     return client.paginate(path, params=params)
+
+
+_FACETS = ("diffs", "commits", "notes", "pipelines", "conflicts")
 
 
 def get_merge_request(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
+    *,
+    include: str | None = None,
 ) -> Any:
     """Fetch a single merge request by project and IID.
 
@@ -103,13 +124,58 @@ def get_merge_request(
         client: GitLab HTTP client.
         project_id: Project id or path.
         merge_request_iid: Merge request IID within the project.
+        include: Comma-separated facets (diffs, commits, notes, pipelines, conflicts).
 
     Returns:
-        Merge request object.
+        Merge request object, or that object plus an ``include`` map.
 
     """
-    path = f"/projects/{encode_path_segment(project_id)}/merge_requests/{merge_request_iid}"
-    return client.get(path)
+    path = mr_base_path(project_id, merge_request_iid)
+    body = client.get(path)
+    facets = _facets(include)
+    if not facets:
+        return body
+    attached = {name: _facet(client, path, name) for name in facets}
+    return {"merge_request": body, "include": attached}
+
+
+def _facets(include: str | None) -> list[str]:
+    """Parse and validate include facet names.
+
+    Args:
+        include: Comma-separated facet names.
+
+    Returns:
+        Facet names, possibly empty.
+
+    Raises:
+        ValueError: When a name is not a known facet.
+
+    """
+    names = [name.strip() for name in (include or "").split(",") if name.strip()]
+    unknown = [name for name in names if name not in _FACETS]
+    if unknown:
+        raise ValueError(f"unknown include facet: {', '.join(unknown)}")
+    return names
+
+
+def _facet(client: GitLabClient, path: str, name: str) -> Any:
+    """Load one merge-request include facet.
+
+    Args:
+        client: GitLab HTTP client.
+        path: Merge request base path.
+        name: Facet name.
+
+    Returns:
+        Facet payload.
+
+    """
+    if name == "conflicts":
+        return client.get(f"{path}/conflicts")
+    if name == "notes":
+        return client.paginate(f"{path}/notes")
+    return client.paginate(f"{path}/{name}")
 
 
 def mr_base_path(project_id: str | int, merge_request_iid: int) -> str:

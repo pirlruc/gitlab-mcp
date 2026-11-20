@@ -1,7 +1,7 @@
 # Authored backlog for gitlab-mcp.
 #
 # Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
-# Methodology: https://github.com/pirlruc/methodologies/tree/1.3.0/github-issue-adr
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.11.1/github-issue-adr
 
 milestones:
   - name: Phase 1 — Foundation
@@ -269,7 +269,7 @@ milestones:
   - name: Phase 4 — Container image
     epics:
       - id: GLMCP-009
-        status: open
+        status: done
         title: Production Docker image and multi-registry publish
         overview:
           problem: >-
@@ -299,7 +299,7 @@ milestones:
           - DOCKER-DELIV-001
         tasks:
           - id: GLMCP-009-T1
-            status: open
+            status: done
             title: Author Dockerfile structure-test and docker docs
             instructions:
               files:
@@ -311,7 +311,7 @@ milestones:
             guardrail_refs:
               - DOCKER-BUILD-003
           - id: GLMCP-009-T2
-            status: open
+            status: done
             title: Wire containerdevops callers and release publish
             instructions:
               files:
@@ -324,7 +324,7 @@ milestones:
               - DOCKER-DELIV-001
 
       - id: GLMCP-010
-        status: open
+        status: done
         title: Align with org Python floors and drop guardrails-note
         overview:
           problem: >-
@@ -350,7 +350,7 @@ milestones:
           - PY-DOC-001
         tasks:
           - id: GLMCP-010-T1
-            status: open
+            status: done
             title: Raise MI avg and extend local floor checks
             instructions:
               files:
@@ -365,7 +365,7 @@ milestones:
   - name: Phase 5 — Supply chain parity
     epics:
       - id: GLMCP-011
-        status: open
+        status: done
         title: Wheel and sdist SBOM, provenance, and signing
         overview:
           problem: >-
@@ -391,7 +391,7 @@ milestones:
           - DOCKER-SEC-004
         tasks:
           - id: GLMCP-011-T1
-            status: open
+            status: done
             title: Add SBOM and attestation steps to github-release job
             instructions:
               files:
@@ -448,7 +448,7 @@ milestones:
   - name: Continuous improvement
     epics:
       - id: GLMCP-013
-        status: open
+        status: done
         title: Review for improvements, bugs, and design flaws
         overview:
           problem: >-
@@ -471,7 +471,7 @@ milestones:
           - Does not re-file work already covered by existing epic/task ids
         tasks:
           - id: GLMCP-013-T1
-            status: open
+            status: done
             title: Run review pass and append material issues.yml findings
             instructions:
               files:
@@ -480,10 +480,60 @@ milestones:
             verification:
               - PR appends material findings within budget, or handoff records justified no-op
 
+      - id: GLMCP-022
+        status: done
+        title: Serve MCP over streamable HTTP
+        overview:
+          problem: >-
+            The server speaks stdio only. A homelab client on another machine
+            cannot attach, and an open port 3333 would proxy the GitLab token
+            to anyone on the LAN.
+          goal: >-
+            MCP_TRANSPORT=streamable-http listens on port 3333 with a required
+            bearer file, Host and Origin checks, GITLAB_TOKEN_FILE, and
+            GET /healthz. stdio stays the default. SSE is not added.
+        decision: >-
+          In the context of a LAN MCP listener, facing a stdio-only server, we
+          decided streamable HTTP with a file-backed bearer and Host checks,
+          to achieve a remote client without an open token proxy, accepting
+          that SSE is not implemented.
+        out_of_scope:
+          - SSE transport
+          - OAuth login; the bearer secret is static
+        architecture:
+          target: src/gitlab_mcp/http_transport.py
+          modules:
+            - src/gitlab_mcp/config.py
+            - src/gitlab_mcp/http_transport.py
+            - src/gitlab_mcp/server.py
+            - Dockerfile
+        acceptance_criteria:
+          - Default transport remains stdio
+          - HTTP mode refuses to start without MCP_AUTH_TOKEN_FILE and MCP_ALLOWED_HOSTS
+          - GET /healthz does not require the bearer token
+          - A wrong Host is rejected
+        guardrail_refs:
+          - PY-SEC-002
+          - DOCKER-RUN-005
+        tasks:
+          - id: GLMCP-022-T1
+            status: done
+            title: Add streamable HTTP, bearer auth, and healthz
+            instructions:
+              files:
+                - src/gitlab_mcp/http_transport.py
+                - src/gitlab_mcp/config.py
+                - docs/configuration.md
+                - Dockerfile
+            verification:
+              - uv run pytest tests/test_http_transport.py tests/test_config.py
+            guardrail_refs:
+              - PY-SEC-002
+
   - name: Phase 6 — Official MCP tool parity
     epics:
       - id: GLMCP-014
-        status: open
+        status: done
         title: Align existing MR tools with GitLab official MCP surface
         overview:
           problem: >-
@@ -520,7 +570,7 @@ milestones:
           - PY-TEST-002
         tasks:
           - id: GLMCP-014-T1
-            status: open
+            status: done
             title: Add get_mcp_server_version and official MR tool aliases
             instructions:
               files:
@@ -533,7 +583,7 @@ milestones:
             guardrail_refs:
               - PY-API-001
           - id: GLMCP-014-T2
-            status: open
+            status: done
             title: Align get/list MR parameters with official MCP (url, include, filters)
             instructions:
               files:
@@ -546,7 +596,7 @@ milestones:
             guardrail_refs:
               - PY-TEST-002
           - id: GLMCP-014-T3
-            status: open
+            status: done
             title: Add create_merge_request_note and get_merge_request_notes parity
             instructions:
               files:
@@ -561,7 +611,7 @@ milestones:
               - PY-API-001
 
       - id: GLMCP-015
-        status: open
+        status: done
         title: Add create_issue and get_issue tools
         overview:
           problem: >-
@@ -589,7 +639,7 @@ milestones:
           - PY-API-001
         tasks:
           - id: GLMCP-015-T1
-            status: open
+            status: done
             title: Implement get_issue and create_issue with tests
             instructions:
               files:
@@ -603,11 +653,11 @@ milestones:
               - PY-TEST-002
 
       - id: GLMCP-016
-        status: open
+        status: done
         title: Pipeline jobs, job logs, and manage_pipeline
         overview:
           problem: >-
-            Official MCP provides get_pipeline_jobs, get_job_log, and manage_pipeline
+            Official MCP provides get_pipeline_jobs, get_job, and manage_pipeline
             (list/create/retry/cancel/delete/update). This server only lists pipelines
             attached to an MR and cannot inspect jobs or drive CI.
           goal: >-
@@ -621,7 +671,7 @@ milestones:
             - src/gitlab_mcp/server.py
             - docs/tools.md
         acceptance_criteria:
-          - get_pipeline_jobs and get_job_log return job lists and traces
+          - get_pipeline_jobs and get_job return job lists and traces
           - manage_pipeline supports list and create; retry/cancel when write enabled
           - Destructive delete requires an explicit allow path or stays documented as unavailable
           - GITLAB_READ_ONLY omits write-capable manage_pipeline mutations
@@ -630,8 +680,8 @@ milestones:
           - PY-TEST-002
         tasks:
           - id: GLMCP-016-T1
-            status: open
-            title: Implement get_pipeline_jobs and get_job_log
+            status: done
+            title: Implement get_pipeline_jobs and get_job
             instructions:
               files:
                 - src/gitlab_mcp/tools/pipelines.py
@@ -642,7 +692,7 @@ milestones:
             guardrail_refs:
               - PY-TEST-002
           - id: GLMCP-016-T2
-            status: open
+            status: done
             title: Implement manage_pipeline with write-safety gates
             instructions:
               files:
@@ -656,7 +706,7 @@ milestones:
               - PY-SEC-002
 
       - id: GLMCP-017
-        status: open
+        status: done
         title: Work-item notes, linking, and saved views
         overview:
           problem: >-
@@ -682,7 +732,7 @@ milestones:
           - PY-TEST-001
         tasks:
           - id: GLMCP-017-T1
-            status: open
+            status: done
             title: Implement work-item note tools
             instructions:
               files:
@@ -694,7 +744,7 @@ milestones:
             guardrail_refs:
               - PY-TEST-001
           - id: GLMCP-017-T2
-            status: open
+            status: done
             title: Implement link_work_items and get_saved_view_work_items
             instructions:
               files:
@@ -707,7 +757,7 @@ milestones:
               - PY-API-001
 
       - id: GLMCP-018
-        status: open
+        status: done
         title: Multi-scope search and search_labels
         overview:
           problem: >-
@@ -733,7 +783,7 @@ milestones:
           - PY-TEST-002
         tasks:
           - id: GLMCP-018-T1
-            status: open
+            status: done
             title: Implement multi-scope search and search_labels
             instructions:
               files:
@@ -747,7 +797,7 @@ milestones:
               - PY-TEST-002
 
       - id: GLMCP-019
-        status: open
+        status: done
         title: Add list_wiki_pages tool
         overview:
           problem: >-
@@ -770,7 +820,7 @@ milestones:
           - PY-TEST-001
         tasks:
           - id: GLMCP-019-T1
-            status: open
+            status: done
             title: Implement list_wiki_pages with tests
             instructions:
               files:
@@ -784,7 +834,7 @@ milestones:
               - PY-TEST-001
 
       - id: GLMCP-020
-        status: open
+        status: done
         title: Decide create_merge_request vs intentional block
         overview:
           problem: >-
@@ -814,7 +864,7 @@ milestones:
           - PY-DOC-001
         tasks:
           - id: GLMCP-020-T1
-            status: open
+            status: done
             title: Implement create_merge_request or document permanent unavailability
             instructions:
               files:
@@ -829,11 +879,13 @@ milestones:
               - PY-SEC-002
 
       - id: GLMCP-021
-        status: open
+        status: rejected
+        resolution: >-
+          Duo Agent Platform, Orbit, and vulnerability tools need GitLab Premium or Ultimate and stay out of this server.
         title: Optional Duo and security tools (semantic search, scan profiles)
         overview:
           problem: >-
-            Official MCP ships semantic_code_search (Duo add-on) and
+            Official MCP ships semantic_search (Duo add-on) and
             attach_scan_profile. Self-hosted Free instances typically lack these;
             silent omission without stubs confuses agents comparing tool lists.
           goal: >-
@@ -848,7 +900,7 @@ milestones:
             - docs/tools.md
             - docs/configuration.md
         acceptance_criteria:
-          - semantic_code_search and attach_scan_profile either work when the instance supports them or return a typed unsupported error
+          - semantic_search and attach_scan_profile either work when the instance supports them or return a typed unsupported error
           - Configuration docs state Duo/security prerequisites
           - Tools appear in docs/tools.md with tier notes
         guardrail_refs:
@@ -856,8 +908,10 @@ milestones:
           - PY-DOC-001
         tasks:
           - id: GLMCP-021-T1
-            status: open
-            title: Add semantic_code_search and attach_scan_profile with capability gating
+            status: rejected
+            resolution: >-
+              Not implemented. The tools require a paid GitLab tier this server does not target.
+            title: Add semantic_search and attach_scan_profile with capability gating
             instructions:
               files:
                 - src/gitlab_mcp/tools/optional.py
@@ -870,3 +924,229 @@ milestones:
               - Unsupported path covered without requiring Duo
             guardrail_refs:
               - PY-API-001
+
+  - name: Phase 7 — Guardrails 1.15.0 and image variants
+    epics:
+      - id: GLMCP-023
+        status: done
+        title: Record the official MCP parity scope
+        decision: >-
+          In the context of matching GitLab's MCP server, facing a much larger
+          tool catalog, we decided to add the read toolsets for core, repository,
+          and CI and to keep new writes opt-in, to achieve a useful agent surface,
+          accepting that Duo, Orbit, and vulnerabilities stay out.
+        overview:
+          problem: The official catalog is broader than the merge-request server.
+          goal: Record which toolsets this server implements.
+        acceptance_criteria:
+          - Duo, Orbit, and vulnerability tools are out of scope
+        guardrail_refs:
+          - MCP-API-001
+        tasks:
+          - id: GLMCP-023-T1
+            status: done
+            title: Document the parity scope in docs/tools.md
+            instructions:
+              files:
+                - docs/tools.md
+            verification:
+              - docs/tools.md names the toolsets and the unavailable set
+      - id: GLMCP-024
+        status: done
+        title: Add core read tools
+        decision: >-
+          In the context of project and group questions, facing merge-request-only
+          tools, we decided REST reads for projects, groups, users, milestones, and
+          todos, to achieve basic navigation, accepting no project mutation.
+        overview:
+          problem: Agents cannot read a project or group.
+          goal: Register the core read toolset.
+        acceptance_criteria:
+          - get_mcp_server_version, get_project, and list_projects are registered
+        guardrail_refs:
+          - PY-TEST-002
+        tasks:
+          - id: GLMCP-024-T1
+            status: done
+            title: Implement core reads
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/surface.py
+            verification:
+              - uv run pytest tests/test_surface.py
+      - id: GLMCP-025
+        status: done
+        title: Add repository read tools
+        decision: >-
+          In the context of reading a repository, facing no file or commit tools,
+          we decided REST reads for branches, files, trees, commits, tags, and
+          releases, to achieve repository context, accepting no writes to git.
+        overview:
+          problem: Agents cannot read repository files.
+          goal: Register the repository read toolset.
+        acceptance_criteria:
+          - get_repository_file and list_commits are registered
+        guardrail_refs:
+          - PY-TEST-002
+        tasks:
+          - id: GLMCP-025-T1
+            status: done
+            title: Implement repository reads
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/surface.py
+            verification:
+              - uv run pytest tests/test_surface.py
+      - id: GLMCP-026
+        status: done
+        title: Add CI read tools beyond pipeline jobs
+        decision: >-
+          In the context of CI questions, facing MR pipelines only, we decided
+          project pipeline, job, artifact, and schedule reads with a byte cap,
+          to achieve CI context, accepting that manage_pipeline stays opt-in.
+        overview:
+          problem: Agents cannot read a project pipeline or a capped job log.
+          goal: Register the CI read toolset.
+        acceptance_criteria:
+          - get_job caps logs at 512000 bytes
+        guardrail_refs:
+          - PY-SEC-002
+        tasks:
+          - id: GLMCP-026-T1
+            status: done
+            title: Implement CI reads
+            instructions:
+              files:
+                - src/gitlab_mcp/tools/surface.py
+            verification:
+              - uv run pytest tests/test_surface.py
+      - id: GLMCP-027
+        status: done
+        title: Close client and HTTP safety gaps
+        decision: >-
+          In the context of tool arguments, facing path injection and silent
+          truncation, we decided encoded path segments, a visible page cap, and
+          response byte caps, to achieve predictable tool output, accepting a
+          new page object on list tools.
+        overview:
+          problem: discussion ids were interpolated raw and long lists were cut quietly.
+          goal: Encode ids, signal truncation, and cap bodies.
+        acceptance_criteria:
+          - discussion ids are URL-encoded
+          - pagination reports truncated and next_page
+        guardrail_refs:
+          - MCP-SEC-001
+          - PY-SEC-005
+        tasks:
+          - id: GLMCP-027-T1
+            status: done
+            title: Encode ids and cap responses
+            instructions:
+              files:
+                - src/gitlab_mcp/client.py
+                - src/gitlab_mcp/tools/discussions.py
+            verification:
+              - uv run pytest tests/test_client.py tests/test_discussions.py
+      - id: GLMCP-028
+        status: done
+        title: Align with guardrails 1.15.0
+        decision: >-
+          In the context of a public repository, facing pins at 1.4.0 and signing
+          deviations written for a private repo, we decided to pin guardrails
+          1.15.0 and drop those deviations, to achieve the public supply-chain
+          contract, accepting a caller rewrite onto current ops workflows.
+        overview:
+          problem: Pins and deviations described a private repository.
+          goal: Pin 1.15.0 and 1.12.0 and delete the stale deviations.
+        acceptance_criteria:
+          - docs/guardrails is 1.15.0
+          - docs/guardrail-deviations.yml has an empty list
+        guardrail_refs:
+          - SC-SIGN-001
+          - SC-DEP-006
+        tasks:
+          - id: GLMCP-028-T1
+            status: done
+            title: Bump pins and clear deviations
+            instructions:
+              files:
+                - docs/guardrail-deviations.yml
+                - .gitmodules
+            verification:
+              - git submodule status
+      - id: GLMCP-029
+        status: done
+        title: Publish a Debian image and an Alpine image
+        decision: >-
+          In the context of image bases, facing a single Debian image, we decided
+          to publish DHI Debian and DHI Alpine, with Debian owning the unsuffixed
+          tags, to achieve a smaller alternative, accepting two publish jobs.
+        overview:
+          problem: Only the Debian image is published.
+          goal: Publish both variants.
+        acceptance_criteria:
+          - Dockerfile.alpine exists and is digest pinned
+          - Debian owns unsuffixed tags
+        guardrail_refs:
+          - DOCKER-BUILD-002
+          - DOCKER-DELIV-003
+        tasks:
+          - id: GLMCP-029-T1
+            status: done
+            title: Add the Alpine Dockerfile and the second publish job
+            instructions:
+              files:
+                - Dockerfile.alpine
+                - .github/workflows/release.yml
+            verification:
+              - docker buildx build --load -f Dockerfile.alpine -t gitlab-mcp:alpine-local .
+      - id: GLMCP-030
+        status: done
+        title: Call the ops reusable workflows
+        decision: >-
+          In the context of inline CI, facing duplicated quality jobs and a
+          pre-1.0 container pin, we decided to call pydevops 3.6.0 and
+          containerdevops 6.6.0, to achieve one gate implementation, accepting
+          a GHCR handoff instead of an image tar.
+        overview:
+          problem: CI reimplemented the Python gates and pinned an old container workflow.
+          goal: Call the current reusable workflows.
+        acceptance_criteria:
+          - containerdevops pin is 6.6.0
+          - python-quality is the quality job
+        guardrail_refs:
+          - CI-034
+          - DOCKER-DELIV-004
+        tasks:
+          - id: GLMCP-030-T1
+            status: done
+            title: Repin callers
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+                - .github/workflows/container.yml
+            verification:
+              - grep -q 1098e68 .github/workflows/container.yml
+      - id: GLMCP-QUOTA-001
+        status: done
+        title: Leave the pre-5.0 image tar handoff
+        decision: >-
+          In the context of the pre-5.0 tar handoff, facing Actions quota, we
+          decided the digest handoff in containerdevops 6.6.0, to achieve a scan
+          without a long-lived tar, accepting a caller rewrite.
+        overview:
+          problem: container.yml uploaded image.tar via image_artifact.
+          goal: Stop passing image_artifact.
+        acceptance_criteria:
+          - container.yml does not pass image_artifact
+        guardrail_refs:
+          - DOCKER-DELIV-004
+        tasks:
+          - id: GLMCP-QUOTA-001-T1
+            status: done
+            title: Scan by GHCR digest
+            instructions:
+              files:
+                - .github/workflows/container.yml
+            verification:
+              - grep -q handoff_package .github/workflows/container.yml

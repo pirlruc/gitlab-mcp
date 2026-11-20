@@ -4,12 +4,16 @@ requires = ["setuptools>=83.0.0", "wheel>=0.47.0"]
 
 [project]
 name = "gitlab-mcp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
-  "httpcore2>=2.10.0",
+  "certifi>=2026.10.23",
+  "filelock>=4.2.12",
+  "httpcore2>=2.16.0",
   "httpx>=0.28.0",
-  "httpx2>=2.12.0",
-  "mcp>=2.0,<3",
+  "httpx2>=2.16.0",
+  "mcp>=2.3,<3",
+  "pyjwt>=2.15.1",
+  "virtualenv>=21.15.9",
   "pydantic>=2.0",
   "pydantic-settings>=2.0",
 ]
@@ -23,7 +27,7 @@ classifiers = [
   "Typing :: Typed",
 ]
 description = "MCP server exposing read and safe-update GitLab merge request tools"
-keywords = ["gitlab", "mcp", "merge-request", "stdio"]
+keywords = ["gitlab", "mcp", "merge-request", "stdio", "streamable-http"]
 license = "MIT"
 license-files = ["LICENSE"]
 readme = "README.md"
@@ -161,12 +165,16 @@ select = [
   "W",
 ]
 
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
 [tool.ruff.lint.pydoclint]
 ignore-one-line-docstrings = false
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["SIM117"]
 "scripts/smoke.py" = ["T201"]
+"scripts/lint-doc-links.py" = ["D", "DOC"]
 
 [tool.setuptools.package-data]
 gitlab_mcp = ["py.typed"]

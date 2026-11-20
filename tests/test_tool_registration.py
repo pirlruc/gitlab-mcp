@@ -154,7 +154,7 @@ def test_main_is_callable(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(
         "gitlab_mcp.server.create_server",
-        lambda: FakeServer(),
+        lambda *_args, **_kwargs: FakeServer(),
     )
     monkeypatch.setenv("GITLAB_URL", "https://g.example")
     monkeypatch.setenv("GITLAB_TOKEN", "t")

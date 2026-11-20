@@ -8,8 +8,10 @@ build/hardening notes for maintainers live in [docker.md](docker.md).
 self-hosted GitLab. It exposes merge-request tools (list, search, diffs,
 discussions, pipelines, and allowlisted updates) to MCP clients such as Cursor.
 
-The image speaks MCP over **stdin/stdout** only. There is no HTTP port and no
-container `HEALTHCHECK`.
+The default is MCP over **stdin/stdout**. Set `MCP_TRANSPORT=streamable-http`
+to listen on port 3333. That mode requires `MCP_AUTH_TOKEN_FILE` and
+`MCP_ALLOWED_HOSTS`. There is no image `HEALTHCHECK`; probe `GET /healthz`
+when HTTP is enabled.
 
 ## Image
 
@@ -24,12 +26,11 @@ container `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `0.1.0` | Immutable release (example; use a semver tag) |
-| `0.1` | Latest patch in the `0.1` line |
-| `latest` | Latest release on the default branch publish |
-| `sha-<git>` | Exact git SHA of the published commit |
+| `0.1.0` / `0.1` / `latest` / `sha-eacb0af` | Multi-arch index `sha256:9df623d5351c9c544177a3b71db93d7ceae5f96afe89df39fa0fb876b5fa4b8e` |
+| `0.1.0` linux/amd64 | `sha256:b70b8437dc82bff081767550b2f9c2dfa30bbf0c14775b6f681b4efd3af0cc26` |
+| `0.1.0` linux/arm64 | `sha256:3b01f0401f06252075d72c5d5f3a56c5ce4b092a73dd6afff9c7d0e18a5e256c` |
 
-Prefer a version tag (or digest) in production.
+Prefer the index digest in production so the client selects the architecture.
 
 ```bash
 docker pull pirlruc/gitlab-mcp:0.1.0
@@ -77,8 +78,15 @@ All configuration is via environment variables (no CLI flags for secrets).
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `GITLAB_URL` | **yes** | — | GitLab base URL, e.g. `https://gitlab.example.com` |
-| `GITLAB_TOKEN` | **yes** | — | Personal or project access token |
-| `GITLAB_READ_ONLY` | no | `false` | When `true` / `1`, write tools are not registered |
+| `GITLAB_TOKEN` | one of token or file | — | Personal or project access token |
+| `GITLAB_TOKEN_FILE` | one of token or file | — | File containing the GitLab token. Replaces `GITLAB_TOKEN` |
+| `MCP_TRANSPORT` | no | `stdio` | `stdio` or `streamable-http` |
+| `MCP_HTTP_HOST` | no | `127.0.0.1` | HTTP bind address |
+| `MCP_HTTP_PORT` | no | `3333` | HTTP bind port |
+| `MCP_AUTH_TOKEN_FILE` | HTTP only | — | Bearer secret file. Required for HTTP. Not an environment variable |
+| `MCP_ALLOWED_HOSTS` | HTTP only | — | Comma-separated Host values. Required for HTTP |
+| `MCP_ALLOWED_ORIGINS` | no | empty | Comma-separated Origin values |
+| `GITLAB_READ_ONLY` | no | `true` | Set `0` to register write tools. The default is read-only |
 | `GITLAB_DEFAULT_PROJECT` | no | — | Default project id or `group/project` path |
 | `GITLAB_TIMEOUT_SECONDS` | no | `30` | HTTP timeout in seconds |
 | `GITLAB_PER_PAGE` | no | `50` | Page size for list endpoints (1–100) |

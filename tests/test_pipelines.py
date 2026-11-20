@@ -22,7 +22,7 @@ def test_pipelines_participants_reviewers(settings: Settings) -> None:
         return httpx.Response(404)
 
     with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
-        assert pipelines.list_merge_request_pipelines(client, 1, 2)[0]["id"] == 10
+        assert pipelines.list_merge_request_pipelines(client, 1, 2)["items"][0]["id"] == 10
         assert pipelines.list_merge_request_participants(client, 1, 2)[0]["username"] == "alice"
         assert pipelines.list_merge_request_reviewers(client, 1, 2)[0]["user"]["username"] == "bob"
 

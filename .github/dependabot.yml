@@ -1,20 +1,10 @@
-# SC-DEP-001/002/003 — single multi-ecosystem PR, monthly, all semver levels.
-# Cadence: docs/guardrails/supply-chain/profile.thresholds.yml (after submodule bump).
-# Multi-ecosystem docs:
-# https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configuring-multi-ecosystem-updates
-#
-# Personal-account private deps: DEPENDABOT_GITHUB_TOKEN (PAT) via type: git.
-# dhi.io: DOCKERHUB_USERNAME / DOCKERHUB_TOKEN (Dependabot secrets, not Actions).
+# SC-DEP-001/002/003/006 — one multi-ecosystem PR, monthly, cooldown 7 days.
+# Security updates ignore multi-ecosystem groups, so each ecosystem groups them.
+# gitsubmodule stays outside the group (SC-DEP-004).
 
 version: 2
 
 registries:
-  github-private:
-    type: git
-    url: https://github.com
-    username: x-access-token
-    password: ${{secrets.DEPENDABOT_GITHUB_TOKEN}}
-
   dhi:
     type: docker-registry
     url: https://dhi.io
@@ -27,6 +17,8 @@ multi-ecosystem-groups:
       interval: monthly
       time: "06:00"
       timezone: Europe/Lisbon
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: build
       include: scope
@@ -36,22 +28,24 @@ updates:
     directory: /
     patterns: ["*"]
     multi-ecosystem-group: all-dependencies
-    registries:
-      - github-private
+    groups:
+      uv-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: github-actions
     directory: /
     patterns: ["*"]
     multi-ecosystem-group: all-dependencies
-    registries:
-      - github-private
+    groups:
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
   - package-ecosystem: pre-commit
     directory: /
     patterns: ["*"]
     multi-ecosystem-group: all-dependencies
-    registries:
-      - github-private
 
   - package-ecosystem: docker
     directory: /
@@ -59,5 +53,16 @@ updates:
     multi-ecosystem-group: all-dependencies
     registries:
       - dhi
+    groups:
+      docker-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
-# Re-check 2026-08-09T22:19: guardrails PAT access added.
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/Lisbon
+    cooldown:
+      default-days: 7

@@ -120,7 +120,7 @@ Task ids: `<EPIC-ID>-T1`, …
 |------|--------|
 | `src/` | MCP stdio server and GitLab client |
 | `scripts/` | Local CI parity, quality gates, digest pin, smoke |
-| `Dockerfile` / image docs | Product image (DHI base, structure tests, Hub/GHCR) |
+| `Dockerfile` / `docs/docker-hub.md` / `docs/github-packages.md` | Product image (DHI base, structure tests). Hub and GitHub Packages pages for `gitlab-mcp` |
 | `.github/workflows/` | Quality CI, container scan/publish, release |
 | `docs/` | Handoff, this prompt, authored `issues.yml`, deviations |
 | `.github/dependabot.yml` | Multi-ecosystem dependency updates |

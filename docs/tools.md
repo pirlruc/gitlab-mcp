@@ -18,7 +18,7 @@
 | `list_merge_request_participants` | `GET .../participants` |
 | `list_merge_request_reviewers` | `GET .../reviewers` |
 
-## Write tools (disabled when `GITLAB_READ_ONLY=1`)
+## Write tools (registered only when `GITLAB_READ_ONLY=0`)
 
 | Tool | GitLab API |
 |------|------------|
@@ -36,8 +36,14 @@
 Fields such as `state_event`, `target_branch`, and merge-related keys are
 rejected before the request is built.
 
+## Also registered
+
+`GITLAB_TOOLSETS` selects `merge_requests`, `issues`, `work_items`, `search`,
+`wiki`, `core`, `repository`, and `ci`. `all` registers every set.
+`get_merge_request` accepts a `url` only when its host matches `GITLAB_URL`.
+Job logs and artifact files are truncated (`truncated: true`) rather than returned whole.
+
 ## Explicitly unavailable
 
-Create MR, merge, close, reopen, delete, rebase, approve, assignees/reviewers
-assignment, draft toggle, note edit/delete, emoji, subscribe, todo, time
-tracking.
+Merge, close, reopen, delete, rebase, approve, Duo Agent Platform, Orbit, and
+vulnerability tools. `accept_merge_request` stays blocked.
