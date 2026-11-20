@@ -13,10 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # python-quality.yml also runs inside ghcr.io/pirlruc/ci-python.
-  # ci-lint is on this repository's package access list. ci-python is not:
-  # Actions gets "manifest unknown" for both the 3.6.0 digest and the
-  # public index. The host job is the same gate as scripts/check-ci-local.sh.
+  # ci-lint and ci-python both pull. python-quality 3.6.0 then runs
+  # pylint and mypy on the whole checkout, including .venv, and the
+  # static job hits its 45 minute limit. The host job is the same gate
+  # as scripts/check-ci-local.sh. uv audit stays in the job below.
   quality:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

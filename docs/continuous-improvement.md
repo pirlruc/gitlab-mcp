@@ -139,7 +139,7 @@ Do not recommend removing these without **requires user decision**:
 2. `GITLAB_READ_ONLY=1` omits write tools from `tools/list`
 3. `docs/issues.yml` is the authored backlog
 4. Guardrails stay canonical in `pirlruc/guardrails` — record deviations here only
-5. Signing and provenance remain deviation-gated while the repository is private
+5. The GHCR package stays private. Docker Hub is the public pull. Signing runs on the public repository
 6. Container jobs that need Actions secrets skip Dependabot and fork PRs (CI-024)
 
 ## Automation configuration
