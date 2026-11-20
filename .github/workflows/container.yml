@@ -21,6 +21,7 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event_name != 'schedule'
     permissions:
       contents: read
+      packages: read
       security-events: write
     uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
     with:
