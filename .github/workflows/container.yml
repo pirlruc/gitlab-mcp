@@ -30,6 +30,10 @@ jobs:
         Dockerfile.alpine
       scripts_ref: 0274fd4600e1a793d694a2a882d96a14a6a18d2a
       blocking: true
+      # Nested jobs log into GHCR with the caller token and then cannot see
+      # the public ci-lint index. Hadolint still runs on the host.
+      run_infra_lint: false
+      run_secrets_scan: false
 
   build-debian:
     needs: lint
