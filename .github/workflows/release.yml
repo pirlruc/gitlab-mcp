@@ -40,7 +40,9 @@ jobs:
       environment: release
       dockerhub_readme: docs/docker-hub.md
       dockerhub_short_description: MCP server for self-hosted GitLab merge requests
-      structure_test_config: container-structure-test.yml
+      # CST on the publish runner requests the host platform, so an arm64
+      # tag fails. The pull-request build still runs the structure test.
+      # Multi-arch verify here is the smoke command only.
       verify_command: /app/.venv/bin/python -m gitlab_mcp.importcheck
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -67,7 +69,9 @@ jobs:
       blocking: true
       dhi_login: true
       environment: release
-      structure_test_config: container-structure-test.yml
+      # CST on the publish runner requests the host platform, so an arm64
+      # tag fails. The pull-request build still runs the structure test.
+      # Multi-arch verify here is the smoke command only.
       verify_command: /app/.venv/bin/python -m gitlab_mcp.importcheck
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
