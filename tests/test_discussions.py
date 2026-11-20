@@ -21,7 +21,8 @@ def test_list_and_get_discussion(settings: Settings) -> None:
         return httpx.Response(200, json=[{"id": "d1"}])
 
     with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
-        assert discussions.list_merge_request_discussions(client, 1, 2)[0]["id"] == "d1"
+        listed = discussions.list_merge_request_discussions(client, 1, 2)
+        assert listed["items"][0]["id"] == "d1"
         assert discussions.get_merge_request_discussion(client, 1, 2, "d1")["id"] == "d1"
 
 
@@ -71,3 +72,17 @@ def test_create_reply_resolve(settings: Settings) -> None:
     assert reply["body"] == "reply"
     assert resolved["resolved"] is True
     assert any("position" in item[2] for item in seen if item[0] == "POST")
+
+
+def test_discussion_id_is_encoded(settings: Settings) -> None:
+    """A discussion id cannot change the request path."""
+    seen: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(str(request.url))
+        return httpx.Response(200, json={"id": "x"})
+
+    with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
+        discussions.get_merge_request_discussion(client, "group/proj", 2, "a/b?c")
+    raw = seen[0]
+    assert "a%2Fb%3Fc" in raw or "discussions/a%2Fb%3Fc" in raw

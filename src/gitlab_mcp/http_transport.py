@@ -7,6 +7,7 @@ read secrets.
 
 from __future__ import annotations
 
+import hashlib
 import hmac
 import ipaddress
 from collections.abc import Callable
@@ -25,14 +26,16 @@ from gitlab_mcp.config import Settings, read_secret_file, split_csv
 class StaticTokenVerifier:
     """Compare a bearer token to a file-backed secret."""
 
-    def __init__(self, expected: str) -> None:
+    def __init__(self, expected: str, resource: str) -> None:
         """Store the expected bearer secret.
 
         Args:
             expected: Secret read from ``MCP_AUTH_TOKEN_FILE``.
+            resource: Resource URL the token is issued for.
 
         """
         self._expected = expected
+        self._resource = resource
 
     async def verify_token(self, token: str) -> AccessToken | None:
         """Accept the configured bearer token.
@@ -44,9 +47,16 @@ class StaticTokenVerifier:
             An access token when the bearer matches, otherwise ``None``.
 
         """
-        if not hmac.compare_digest(token, self._expected):
+        presented = hashlib.sha256(token.encode()).digest()
+        expected = hashlib.sha256(self._expected.encode()).digest()
+        if not hmac.compare_digest(presented, expected):
             return None
-        return AccessToken(token=token, client_id="mcp-client", scopes=[])
+        return AccessToken(
+            token=token,
+            client_id="mcp-client",
+            scopes=[],
+            resource=self._resource,
+        )
 
 
 def resource_url(settings: Settings) -> str:
@@ -108,11 +118,16 @@ def build_http_server(
     """
     secret = read_secret_file(settings.mcp_auth_token_file or "")
     url = AnyHttpUrl(resource_url(settings))
-    auth = AuthSettings(issuer_url=url, resource_server_url=url, required_scopes=[])
+    auth = AuthSettings(
+        issuer_url=url,
+        resource_server_url=url,
+        required_scopes=[],
+        validate_token_resource=True,
+    )
     server = factory(
         settings,
         auth=auth,
-        token_verifier=StaticTokenVerifier(secret),
+        token_verifier=StaticTokenVerifier(secret, str(url)),
     )
     server.custom_route("/healthz", methods=["GET"], include_in_schema=False)(healthz)
     return server

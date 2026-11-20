@@ -53,7 +53,7 @@ def test_list_project_scope(settings: Settings) -> None:
         project_id="group/project",
         filters=filters,
     )
-    assert items[0]["iid"] == 1
+    assert items["items"][0]["iid"] == 1
 
 
 def test_list_rejects_both_scopes(settings: Settings) -> None:
@@ -77,7 +77,7 @@ def test_search_instance_scope(settings: Settings) -> None:
 
     client = GitLabClient(settings, transport=httpx.MockTransport(handler))
     items = merge_requests.search_merge_requests(client, "login")
-    assert items[0]["iid"] == 2
+    assert items["items"][0]["iid"] == 2
     assert seen["scope"] == "merge_requests"
     assert seen["search"] == "login"
 
@@ -97,19 +97,21 @@ def test_list_group_and_instance(settings: Settings) -> None:
     """Group and instance list paths are selected correctly."""
     client = _client(settings, "/groups/g/merge_requests", [{"iid": 3}])
     items = merge_requests.list_merge_requests(client, group_id="g")
-    assert items[0]["iid"] == 3
+    assert items["items"][0]["iid"] == 3
 
     client2 = _client(settings, "/merge_requests", [{"iid": 4}])
     items2 = merge_requests.list_merge_requests(client2)
-    assert items2[0]["iid"] == 4
+    assert items2["items"][0]["iid"] == 4
 
 
 def test_search_project_and_group(settings: Settings) -> None:
     """Search scopes project and group paths."""
     client = _client(settings, "/projects/", [{"iid": 5}])
-    assert merge_requests.search_merge_requests(client, "q", project_id=1)[0]["iid"] == 5
+    found = merge_requests.search_merge_requests(client, "q", project_id=1)
+    assert found["items"][0]["iid"] == 5
     client2 = _client(settings, "/groups/", [{"iid": 6}])
-    assert merge_requests.search_merge_requests(client2, "q", group_id="g")[0]["iid"] == 6
+    found2 = merge_requests.search_merge_requests(client2, "q", group_id="g")
+    assert found2["items"][0]["iid"] == 6
 
 
 def test_search_rejects_both_scopes(settings: Settings) -> None:

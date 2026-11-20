@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-import logging
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-logger = logging.getLogger(__name__)
 
 
 def split_csv(value: str) -> list[str]:
@@ -46,7 +43,7 @@ def read_secret_file(path: str) -> str:
     except OSError as exc:
         raise ValueError(f"cannot read secret file: {exc.strerror}") from exc
     if mode & 0o077:
-        logger.warning("file %s mode allows group or other access", path)
+        raise ValueError("secret file mode allows group or other access")
     secret = text.strip()
     if not secret:
         raise ValueError("secret file is empty")
@@ -77,7 +74,7 @@ class Settings(BaseSettings):
         gitlab_url: Base URL of the self-hosted GitLab instance.
         gitlab_token: Personal or project access token.
         gitlab_token_file: Path to a file containing the GitLab token.
-        gitlab_read_only: When true, write tools are not registered.
+        gitlab_read_only: When true (the default), write tools are not registered.
         mcp_transport: ``stdio`` or ``streamable-http``.
         mcp_http_host: Bind address for streamable HTTP.
         mcp_http_port: Bind port for streamable HTTP.
@@ -88,6 +85,8 @@ class Settings(BaseSettings):
         gitlab_timeout_seconds: HTTP request timeout in seconds.
         gitlab_per_page: Page size for paginated list endpoints.
         gitlab_max_pages: Hard cap on pages fetched per request.
+        gitlab_max_response_bytes: Hard cap on a JSON response body.
+        gitlab_toolsets: Comma-separated toolsets, or ``all``.
         gitlab_ca_bundle: Optional path to a CA bundle for private CAs.
         gitlab_verify_ssl: Whether to verify TLS certificates.
 
@@ -102,7 +101,7 @@ class Settings(BaseSettings):
     gitlab_url: str = Field(..., description="GitLab base URL")
     gitlab_token: str | None = Field(default=None, description="GitLab access token")
     gitlab_token_file: str | None = Field(default=None)
-    gitlab_read_only: bool = Field(default=False)
+    gitlab_read_only: bool = Field(default=True)
     mcp_transport: Literal["stdio", "streamable-http"] = Field(default="stdio")
     mcp_http_host: str = Field(default="127.0.0.1")
     mcp_http_port: int = Field(default=3333, ge=1, le=65535)
@@ -113,6 +112,8 @@ class Settings(BaseSettings):
     gitlab_timeout_seconds: float = Field(default=30.0, gt=0)
     gitlab_per_page: int = Field(default=50, ge=1, le=100)
     gitlab_max_pages: int = Field(default=20, ge=1)
+    gitlab_max_response_bytes: int = Field(default=1_048_576, gt=0)
+    gitlab_toolsets: str = Field(default="all")
     gitlab_ca_bundle: str | None = Field(default=None)
     gitlab_verify_ssl: bool = Field(default=True)
 

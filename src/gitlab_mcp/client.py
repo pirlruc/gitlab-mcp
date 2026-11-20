@@ -199,12 +199,59 @@ class GitLabClient:
         """
         return self.request("PUT", path, params=params, json=json)
 
+    def graphql(self, query: str, variables: Mapping[str, Any] | None = None) -> Any:
+        """POST a GraphQL query to ``/api/graphql``.
+
+        Args:
+            query: GraphQL document.
+            variables: Optional variables object.
+
+        Returns:
+            The ``data`` object from the GraphQL response.
+
+        Raises:
+            GitLabError: When the response contains errors or no data.
+
+        """
+        url = f"{self.settings.gitlab_url}/api/graphql"
+        payload: dict[str, Any] = {"query": query}
+        if variables:
+            payload["variables"] = dict(variables)
+        body = self.request("POST", url, json=payload)
+        if not isinstance(body, dict):
+            raise GitLabError("GraphQL response was not an object")
+        errors = body.get("errors")
+        if errors:
+            raise GitLabError(redact_secrets(str(errors), self.settings.gitlab_access_token()))
+        return body.get("data")
+
+    def get_capped_text(self, path: str, *, limit: int) -> dict[str, Any]:
+        """GET a text body and truncate it to ``limit`` bytes.
+
+        Args:
+            path: API path relative to ``/api/v4``.
+            limit: Maximum number of bytes kept.
+
+        Returns:
+            ``text``, ``truncated``, and ``bytes``.
+
+        """
+        response = self._send_response("GET", path)
+        raw = response.content
+        truncated = len(raw) > limit
+        kept = raw[:limit]
+        return {
+            "text": kept.decode("utf-8", errors="replace"),
+            "truncated": truncated,
+            "bytes": len(kept),
+        }
+
     def paginate(
         self,
         path: str,
         *,
         params: Mapping[str, Any] | None = None,
-    ) -> list[Any]:
+    ) -> dict[str, Any]:
         """Fetch all pages up to ``gitlab_max_pages``.
 
         Args:
@@ -212,25 +259,37 @@ class GitLabClient:
             params: Optional query parameters (without page/per_page).
 
         Returns:
-            Concatenated list of page items.
+            ``items``, ``truncated``, and ``next_page``. A non-list body is
+            returned under ``object``.
 
         """
         query = dict(params or {})
         query["per_page"] = self.settings.gitlab_per_page
         items: list[Any] = []
         page = 1
+        truncated = False
+        next_page_out: str | None = None
         while page <= self.settings.gitlab_max_pages:
             query["page"] = page
             response = self._send_response("GET", path, params=query)
             body = self._parse_body(response)
             if not isinstance(body, list):
-                return items if items else body
+                return {
+                    "items": items,
+                    "truncated": False,
+                    "next_page": None,
+                    "object": body,
+                }
             items.extend(body)
-            next_page = response.headers.get("X-Next-Page")
+            next_page = response.headers.get("X-Next-Page") or ""
             if not next_page:
                 break
+            if page >= self.settings.gitlab_max_pages:
+                truncated = True
+                next_page_out = next_page
+                break
             page = int(next_page)
-        return items
+        return {"items": items, "truncated": truncated, "next_page": next_page_out}
 
     def _send(
         self,
@@ -293,9 +352,8 @@ class GitLabClient:
         error.message = redact_secrets(error.message, self.settings.gitlab_access_token())
         raise error
 
-    @staticmethod
-    def _parse_body(response: httpx.Response) -> Any:
-        """Parse a successful response body.
+    def _parse_body(self, response: httpx.Response) -> Any:
+        """Parse a successful response body, refusing oversized JSON.
 
         Args:
             response: Successful HTTP response.
@@ -303,7 +361,13 @@ class GitLabClient:
         Returns:
             Parsed JSON, or ``None`` when the body is empty.
 
+        Raises:
+            GitLabError: When the body exceeds ``gitlab_max_response_bytes``.
+
         """
         if response.status_code == 204 or not response.content:
             return None
+        limit = self.settings.gitlab_max_response_bytes
+        if len(response.content) > limit:
+            raise GitLabError(f"response exceeds {limit} bytes")
         return response.json()

@@ -12,7 +12,7 @@ def get_merge_request_diffs(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
-) -> list[Any]:
+) -> Any:
     """List file diffs for a merge request.
 
     Args:
@@ -32,7 +32,7 @@ def list_merge_request_commits(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
-) -> list[Any]:
+) -> Any:
     """List commits on a merge request.
 
     Args:
@@ -52,7 +52,7 @@ def list_merge_request_diff_versions(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
-) -> list[Any]:
+) -> Any:
     """List diff versions (pushes) for a merge request.
 
     Args:

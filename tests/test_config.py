@@ -77,16 +77,16 @@ def test_secret_file_must_exist_and_be_nonempty(tmp_path: Path) -> None:
         )
 
 
-def test_group_readable_secret_still_loads(tmp_path: Path) -> None:
-    """A loose file mode is warned and still loaded."""
+def test_group_readable_secret_is_rejected(tmp_path: Path) -> None:
+    """A loose file mode fails closed."""
     secret = tmp_path / "gitlab"
     secret.write_text("from-file\n")
     secret.chmod(0o644)
-    settings = Settings(
-        gitlab_url="https://gitlab.example.com",
-        gitlab_token_file=str(secret),
-    )
-    assert settings.gitlab_access_token() == "from-file"
+    with pytest.raises(ValidationError, match="group or other"):
+        Settings(
+            gitlab_url="https://gitlab.example.com",
+            gitlab_token_file=str(secret),
+        )
 
 
 def test_access_token_rejects_an_unresolved_model() -> None:

@@ -53,7 +53,7 @@ def _settings(tmp_path: Path, **overrides: object) -> Settings:
 
 def test_verifier_compares_without_leaking_mismatch() -> None:
     """A wrong bearer is rejected and a matching one is accepted."""
-    verifier = StaticTokenVerifier("expected")
+    verifier = StaticTokenVerifier("expected", "http://127.0.0.1:3333")
     assert asyncio.run(verifier.verify_token("nope")) is None
     accepted = asyncio.run(verifier.verify_token("expected"))
     assert accepted is not None
@@ -108,6 +108,17 @@ def test_health_is_public_and_mcp_requires_bearer(tmp_path: Path) -> None:
             content=b"{}",
         )
         assert bad_host.status_code == 421
+        bad_origin = client.post(
+            "/mcp",
+            headers={
+                "Authorization": "Bearer bearer-secret",
+                "Host": "testserver",
+                "Origin": "http://evil.example",
+                "Content-Type": "application/json",
+            },
+            content=b"{}",
+        )
+        assert bad_origin.status_code == 403
 
 
 def test_run_streamable_http_uses_settings(

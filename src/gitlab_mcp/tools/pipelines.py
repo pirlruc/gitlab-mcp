@@ -13,7 +13,7 @@ def list_merge_request_pipelines(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
-) -> list[Any]:
+) -> Any:
     """List pipelines for a merge request.
 
     Args:
@@ -73,7 +73,7 @@ def list_merge_request_participants(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
-) -> list[Any]:
+) -> Any:
     """List participants on a merge request.
 
     Args:
@@ -94,7 +94,7 @@ def list_merge_request_reviewers(
     client: GitLabClient,
     project_id: str | int,
     merge_request_iid: int,
-) -> list[Any]:
+) -> Any:
     """List reviewers on a merge request.
 
     Args:

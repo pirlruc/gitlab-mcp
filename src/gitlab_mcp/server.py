@@ -13,6 +13,10 @@ from gitlab_mcp.config import Settings, get_settings
 from gitlab_mcp.http_transport import run_streamable_http
 from gitlab_mcp.models import DiscussionPosition, MergeRequestListFilters
 from gitlab_mcp.tools import diffs, discussions, merge_requests, pipelines, writes
+from gitlab_mcp.tools.scope import enabled_toolsets
+from gitlab_mcp.tools.surface import _project as _default_project
+from gitlab_mcp.tools.surface import register_surface
+from gitlab_mcp.tools.urls import parse_merge_request_url
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,35 +54,19 @@ def create_server(
     cfg = settings or get_settings()
     server = MCPServer("gitlab-mcp", instructions=INSTRUCTIONS, **server_kwargs)
     http = client or GitLabClient(cfg)
+    chosen = enabled_toolsets(cfg.gitlab_toolsets)
+    allow_writes = not cfg.gitlab_read_only
 
-    _register_read_tools(server, http, cfg)
-    if not cfg.gitlab_read_only:
+    if "merge_requests" in chosen:
+        _register_read_tools(server, http, cfg)
+        _register_mr_aliases(server, http, cfg)
+    if allow_writes and "merge_requests" in chosen:
         _register_write_tools(server, http, cfg)
-    else:
-        logger.info("GITLAB_READ_ONLY set; write tools not registered")
+    elif not allow_writes:
+        logger.info("Read-only mode; write tools not registered")
+    register_surface(server, http, cfg, chosen, allow_writes=allow_writes)
 
     return server
-
-
-def _default_project(cfg: Settings, project_id: str | int | None) -> str | int:
-    """Resolve project id, falling back to the configured default.
-
-    Args:
-        cfg: Runtime settings.
-        project_id: Explicit project id or path.
-
-    Returns:
-        Effective project id.
-
-    Raises:
-        ValueError: If neither argument nor default is available.
-
-    """
-    if project_id is not None:
-        return project_id
-    if cfg.gitlab_default_project:
-        return cfg.gitlab_default_project
-    raise ValueError("project_id is required (or set GITLAB_DEFAULT_PROJECT)")
 
 
 def _register_read_tools(
@@ -116,7 +104,7 @@ def _register_read_tools(
         sort: str | None = None,
         search: str | None = None,
         search_in: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List merge requests with optional filters.
 
         Returns:
@@ -156,7 +144,7 @@ def _register_read_tools(
         query: str,
         project_id: str | None = None,
         group_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """Search merge requests by text query.
 
         Returns:
@@ -172,23 +160,37 @@ def _register_read_tools(
 
     @server.tool()
     def get_merge_request(
-        merge_request_iid: int,
+        merge_request_iid: int | None = None,
         project_id: str | None = None,
+        url: str | None = None,
+        include: str | None = None,
     ) -> Any:
-        """Get a single merge request by IID.
+        """Get a single merge request by IID or by a same-host URL.
 
         Returns:
-            Merge request object.
+            Merge request object, plus requested include facets.
+
+        Raises:
+            ValueError: When neither an IID nor a URL is given.
 
         """
+        if url:
+            project_id, merge_request_iid = parse_merge_request_url(cfg.gitlab_url, url)
+        if merge_request_iid is None:
+            raise ValueError("merge_request_iid or url is required")
         pid = _default_project(cfg, project_id)
-        return merge_requests.get_merge_request(client, pid, merge_request_iid)
+        return merge_requests.get_merge_request(
+            client,
+            pid,
+            merge_request_iid,
+            include=include,
+        )
 
     @server.tool()
     def get_merge_request_diffs(
         merge_request_iid: int,
         project_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List file diffs for a merge request.
 
         Returns:
@@ -202,7 +204,7 @@ def _register_read_tools(
     def list_merge_request_commits(
         merge_request_iid: int,
         project_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List commits on a merge request.
 
         Returns:
@@ -216,7 +218,7 @@ def _register_read_tools(
     def list_merge_request_diff_versions(
         merge_request_iid: int,
         project_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List diff versions (pushes) for a merge request.
 
         Returns:
@@ -250,7 +252,7 @@ def _register_read_tools(
     def list_merge_request_discussions(
         merge_request_iid: int,
         project_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List discussion threads on a merge request.
 
         Returns:
@@ -288,7 +290,7 @@ def _register_read_tools(
     def list_merge_request_pipelines(
         merge_request_iid: int,
         project_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List pipelines for a merge request.
 
         Returns:
@@ -320,7 +322,7 @@ def _register_read_tools(
     def list_merge_request_participants(
         merge_request_iid: int,
         project_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List participants on a merge request.
 
         Returns:
@@ -338,7 +340,7 @@ def _register_read_tools(
     def list_merge_request_reviewers(
         merge_request_iid: int,
         project_id: str | None = None,
-    ) -> list[Any]:
+    ) -> Any:
         """List reviewers on a merge request.
 
         Returns:
@@ -519,6 +521,101 @@ def _register_write_tools(
         }
         provided = {key: value for key, value in fields.items() if value is not None}
         return writes.update_merge_request(client, pid, merge_request_iid, provided)
+
+    @server.tool()
+    def create_merge_request(
+        source_branch: str,
+        target_branch: str,
+        title: str,
+        project_id: str | None = None,
+        description: str | None = None,
+        labels: str | None = None,
+    ) -> Any:
+        """Create a merge request. Merging and closing stay unavailable.
+
+        Returns:
+            Created merge request object.
+
+        """
+        pid = _default_project(cfg, project_id)
+        return writes.create_merge_request(
+            client,
+            pid,
+            source_branch=source_branch,
+            target_branch=target_branch,
+            title=title,
+            description=description,
+            labels=labels,
+        )
+
+
+def _register_mr_aliases(server: MCPServer, client: GitLabClient, cfg: Settings) -> None:
+    """Register official names that alias existing merge request reads.
+
+    Args:
+        server: MCP server instance.
+        client: GitLab HTTP client.
+        cfg: Runtime settings.
+
+    """
+
+    @server.tool()
+    def get_merge_request_commits(
+        merge_request_iid: int,
+        project_id: str | None = None,
+    ) -> Any:
+        """Alias of list_merge_request_commits.
+
+        Returns:
+            Commit objects.
+
+        """
+        pid = _default_project(cfg, project_id)
+        return diffs.list_merge_request_commits(client, pid, merge_request_iid)
+
+    @server.tool()
+    def get_merge_request_pipelines(
+        merge_request_iid: int,
+        project_id: str | None = None,
+    ) -> Any:
+        """Alias of list_merge_request_pipelines.
+
+        Returns:
+            Pipeline objects.
+
+        """
+        pid = _default_project(cfg, project_id)
+        return pipelines.list_merge_request_pipelines(client, pid, merge_request_iid)
+
+    @server.tool()
+    def get_merge_request_notes(
+        merge_request_iid: int,
+        project_id: str | None = None,
+    ) -> Any:
+        """List notes on a merge request.
+
+        Returns:
+            A page of note objects.
+
+        """
+        pid = _default_project(cfg, project_id)
+        path = f"{merge_requests.mr_base_path(pid, merge_request_iid)}/notes"
+        return client.paginate(path)
+
+    @server.tool()
+    def get_merge_request_conflicts(
+        merge_request_iid: int,
+        project_id: str | None = None,
+    ) -> Any:
+        """List merge request conflicts.
+
+        Returns:
+            Conflict payload from GitLab.
+
+        """
+        pid = _default_project(cfg, project_id)
+        path = f"{merge_requests.mr_base_path(pid, merge_request_iid)}/conflicts"
+        return client.get(path)
 
 
 def main() -> None:

@@ -71,8 +71,8 @@ def test_paginate_follows_next_page(settings: Settings) -> None:
         return httpx.Response(200, json=body, headers=headers)
 
     with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
-        items = client.paginate("/merge_requests")
-    assert items == [{"id": 1}, {"id": 2}]
+        page = client.paginate("/merge_requests")
+    assert page == {"items": [{"id": 1}, {"id": 2}], "truncated": False, "next_page": None}
 
 
 def test_retry_on_rate_limit(settings: Settings, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -115,13 +115,49 @@ def test_transport_error(settings: Settings) -> None:
 
 
 def test_paginate_non_list(settings: Settings) -> None:
-    """Non-list first page is returned as-is."""
+    """Non-list first page is returned under object."""
 
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"ok": True})
 
     with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
-        assert client.paginate("/obj") == {"ok": True}
+        assert client.paginate("/obj")["object"] == {"ok": True}
+
+
+def test_paginate_reports_truncation(settings: Settings) -> None:
+    """The page cap is visible to the caller."""
+    settings.gitlab_max_pages = 1
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=[{"id": 1}], headers={"X-Next-Page": "2"})
+
+    with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
+        page = client.paginate("/merge_requests")
+    assert page["truncated"] is True
+    assert page["next_page"] == "2"
+
+
+def test_oversized_json_is_rejected(settings: Settings) -> None:
+    """JSON bodies over the configured cap fail closed."""
+    settings.gitlab_max_response_bytes = 8
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"blob": "x" * 40})
+
+    with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
+        with pytest.raises(GitLabError, match="exceeds"):
+            client.get("/big")
+
+
+def test_capped_text_truncates(settings: Settings) -> None:
+    """Text fetches keep a prefix and report truncation."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=b"abcdef")
+
+    with GitLabClient(settings, transport=httpx.MockTransport(handler)) as client:
+        body = client.get_capped_text("/trace", limit=3)
+    assert body == {"text": "abc", "truncated": True, "bytes": 3}
 
 
 def test_put_and_post(settings: Settings) -> None:
