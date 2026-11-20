@@ -41,7 +41,7 @@ jobs:
       dockerhub_readme: docs/docker-hub.md
       dockerhub_short_description: MCP server for self-hosted GitLab merge requests
       structure_test_config: container-structure-test.yml
-      verify_command: /app/.venv/bin/python -c "import gitlab_mcp"
+      verify_command: /app/.venv/bin/python -m gitlab_mcp.importcheck
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
       dhi_login: true
       environment: release
       structure_test_config: container-structure-test.yml
-      verify_command: /app/.venv/bin/python -c "import gitlab_mcp"
+      verify_command: /app/.venv/bin/python -m gitlab_mcp.importcheck
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
