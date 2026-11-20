@@ -129,9 +129,6 @@ def get_merge_request(
     Returns:
         Merge request object, or that object plus an ``include`` map.
 
-    Raises:
-        ValueError: When ``include`` names an unknown facet.
-
     """
     path = mr_base_path(project_id, merge_request_iid)
     body = client.get(path)
