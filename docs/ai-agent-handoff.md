@@ -15,7 +15,7 @@
 | Supply-chain parity (GLMCP-011) | Done — wheel SBOM via pydevops `python-release` |
 | Dependabot Insights (GLMCP-012) | Done — plus `gitsubmodule`, cooldown, and security groups |
 | Official MCP parity (GLMCP-014…020, 023…026) | Done — read toolsets. GLMCP-021 rejected (paid tiers) |
-| Streamable HTTP (GLMCP-022) | Done — bearer file, Host/Origin checks, `/healthz`. Release `0.2.0` |
+| Streamable HTTP (GLMCP-022) | Done — bearer file, Host/Origin checks, `/healthz`. Tags `v0.2.0` and `v0.2.1` did not publish images. `v0.2.2` is the publish |
 
 ## Commands
 
@@ -115,4 +115,4 @@ docker buildx build --load -t gitlab-mcp:local .
   and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
-*Last updated: 2026-11-20 (guardrails 1.15.0, Alpine image, read toolsets)*
+*Last updated: 2026-11-20 (v0.2.2 publish pin, issues synced)*
