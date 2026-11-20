@@ -91,14 +91,16 @@ docker buildx build --load -t gitlab-mcp:local .
 1. Confirm Hub has the `v0.2.4` and `-alpine` tags. `v0.2.2` and `v0.2.3` were pushed and then failed before signing.
 2. Restrict the `release` GitHub Environment to tag pushes.
 3. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
-4. `python-quality` also pulls `ci-python`. Package access for `ci-lint` does not cover that image.
+4. `python-quality` also pulls `ci-python`. The caller pins `fa43c1f` because tag 3.6.0's digest is hidden from Actions.
 
 ## Recent history
 
-- 2026-11-20: Quality calls pydevops `python-quality` at 3.6.0
-  (`297fb0f`). Container lint runs the nested infra and secrets jobs
-  again. Secret scanning, push protection, private vulnerability
-  reporting, and CodeQL default setup (Python and Actions) are enabled.
+- 2026-11-20: Quality calls pydevops `python-quality` at `fa43c1f`
+  (public `ci-lint` and `ci-python` indexes). Tag 3.6.0's `ci-python`
+  digest returns manifest unknown to Actions. Container lint runs the
+  nested infra and secrets jobs again. Secret scanning, push protection,
+  private vulnerability reporting, and CodeQL default setup (Python and
+  Actions) are enabled.
 - 2026-10-05: GLMCP-022 streamable HTTP. `uv audit` still reports PyJWT and
   virtualenv findings that this change did not introduce. Do not treat that
   failure as a regression of the HTTP work.
