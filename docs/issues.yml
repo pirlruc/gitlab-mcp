@@ -1150,3 +1150,34 @@ milestones:
                 - .github/workflows/container.yml
             verification:
               - grep -q handoff_package .github/workflows/container.yml
+      - id: GLMCP-031
+        status: open
+        title: Call python-quality after it skips the virtualenv
+        decision: >-
+          In the context of the quality job, facing a host copy of the gates,
+          we decided to call python-quality once PDO-VENV-001 is released, to
+          achieve one gate implementation, accepting a pin bump.
+        overview:
+          problem: >-
+            ci-lint and ci-python both pull. python-quality 3.6.0 static
+            analysis was cancelled at 45 minutes because pylint and mypy scan
+            .venv. The quality job stays on scripts/check-ci-local.sh.
+          goal: >-
+            The quality job calls python-quality after that scan excludes .venv.
+        acceptance_criteria:
+          - ".github/workflows/ci.yml calls python-quality.yml"
+          - "The pin is a pydevops ref whose static phase excludes .venv"
+        guardrail_refs:
+          - CI-034
+          - CI-027
+        tasks:
+          - id: GLMCP-031-T1
+            status: open
+            title: Switch the quality job after PDO-VENV-001
+            instructions:
+              files:
+                - .github/workflows/ci.yml
+            verification:
+              - grep -q python-quality.yml .github/workflows/ci.yml
+            guardrail_refs:
+              - CI-034
