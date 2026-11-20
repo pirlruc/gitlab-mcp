@@ -13,24 +13,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # devops_ref matches the uses pin (CI-034). The caller grants the union
-  # of the nested job permissions (CI-031). 3.6.0 pins a ci-python digest
-  # Actions cannot pull. fa43c1f pins the public index. python-quality does
-  # not run uv audit, so the audit job below stays.
+  # python-quality.yml also runs inside ghcr.io/pirlruc/ci-python.
+  # ci-lint is on this repository's package access list. ci-python is not:
+  # Actions gets "manifest unknown" for both the 3.6.0 digest and the
+  # public index. The host job is the same gate as scripts/check-ci-local.sh.
   quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     permissions:
-      actions: write
-      contents: write
-      packages: read
-      pull-requests: write
-      security-events: write
-    uses: pirlruc/pydevops/.github/workflows/python-quality.yml@fa43c1f2cc6bf76d9b5837536bce991274f8071b
-    with:
-      devops_repository: pirlruc/pydevops
-      devops_ref: fa43c1f2cc6bf76d9b5837536bce991274f8071b
-      strictness_level: Medium
-      docstring_format: Google
-      python_version: "3.13"
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+      - name: Sync dependencies
+        run: uv sync --frozen --extra dev
+      - name: Quality gates
+        run: bash scripts/check-ci-local.sh
 
   audit:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
