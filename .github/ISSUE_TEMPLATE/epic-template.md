@@ -19,7 +19,7 @@ assignees: ''
 
 ## Decision (Y-statement)
 
-<!-- Optional one-liner for Major decisions. Delete this section if not needed. -->
+<!-- Required on every new Epic. Do not delete this section. Do not rewrite an existing Epic only to add it. -->
 <!-- Format: In the context of <use case>, facing <concern>, we decided <option>, to achieve <benefit>, accepting <trade-off>. -->
 
 
@@ -52,15 +52,10 @@ Field definitions: https://github.com/pirlruc/guardrails#deviation-rule
 
 <!-- Guardrail IDs, related epics, legacy source_adr IDs, methodology tag — not task verification commands -->
 <!-- Example: CPP-TEST-003, CPP-DOC-001 — https://github.com/pirlruc/guardrails -->
-<!-- Methodology: https://github.com/pirlruc/methodologies/tree/1.3.0/github-issue-adr -->
+<!-- Methodology: https://github.com/pirlruc/methodologies/tree/1.11.0/github-issue-adr -->
 
 ## Epic Acceptance Criteria
 
 - [ ] End-to-end scenario:
 
 <!-- Keep acceptance at epic level. Per-file steps belong in task sub-issues only. -->
-
-## AI metadata
-
-- **creator:** AI_Architect_1
-- **confidence_score:**
