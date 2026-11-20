@@ -88,15 +88,17 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Restrict the `release` GitHub Environment to tag pushes.
-2. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
+1. pydevops `python-quality` 3.6.0 can pull `ci-python` here. Its static phase runs pylint and mypy on `.`, including `.venv`, and was cancelled at the 45 minute job limit. Ignore `.venv` there before this repo calls it.
+2. Restrict the `release` GitHub Environment to tag pushes.
+3. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
 
 ## Recent history
 
-- 2026-11-20: Quality calls pydevops `python-quality` at 3.6.0
-  (`297fb0f`). `ci-python` is on the package access list. GHCR
-  `gitlab-mcp` stays private. Hub Overview is pushed with
-  `DOCKERHUB_DESCRIPTION_TOKEN`.
+- 2026-11-20: `ci-python` pulls. `python-quality` 3.6.0 static analysis
+  was cancelled at 45 minutes because pylint and mypy scan `.venv`.
+  Quality stays on the host. GHCR `gitlab-mcp` stays private. Hub
+  Overview updates by workflow dispatch only, after a push run wrote
+  this page onto `pirlruc/ci-container` and that page was restored.
 - 2026-11-20: Public image pages name signed `0.2.4` (Debian index
   `sha256:527454bc…`, Alpine `sha256:569c3aab…`). Hub Overview stays on
   the old page until `DOCKERHUB_DESCRIPTION_TOKEN` exists. GHCR
