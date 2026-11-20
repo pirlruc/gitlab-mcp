@@ -1,58 +1,103 @@
----
 name: Release
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     tags:
-      - 'v*.*.*'
-  workflow_dispatch:
-permissions:
-  contents: write
-  packages: write
-  id-token: write
+      - "v*.*.*"
+
+permissions: {}
+
 jobs:
   github-release:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        # actions/checkout@v7.0.1
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Set up Python
-        # actions/setup-python@v7.0.0
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
-        with:
-          python-version: '3.13'
-      - name: Set up uv
-        # astral-sh/setup-uv@v9.0.0
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
-      - name: Sync dependencies
-        run: uv sync --frozen --extra dev
-      - name: Build distributions
-        run: uv build
-      - name: Publish GitHub Release
-        # softprops/action-gh-release@v3.0.2
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
-        with:
-          files: dist/*
-          generate_release_notes: true
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: pirlruc/pydevops/.github/workflows/python-release.yml@297fb0f3d7a70e26f9717eb3273933b8d5123b8a
+    with:
+      python_version: "3.13"
 
-  container-publish:
-    # Same pin as .github/workflows/container.yml (checkout_token + scripts_ref).
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+  publish-debian:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
     with:
       context: .
       dockerfile: Dockerfile
       image_name: gitlab-mcp
       dockerhub_image: pirlruc/gitlab-mcp
       platforms: linux/amd64,linux/arm64
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
-      # Private Free-plan repos cannot use artifact attestations; enable when public.
-      sign: ${{ github.event.repository.visibility == 'public' }}
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      tag_suffix: -debian
+      tag_alias_unsuffixed: true
+      tag_latest: true
+      sign: true
       blocking: true
       dhi_login: true
+      environment: release
+      dockerhub_readme: docs/docker-hub.md
+      dockerhub_short_description: MCP server for self-hosted GitLab merge requests
+      structure_test_config: container-structure-test.yml
+      verify_command: /app/.venv/bin/python -c "import gitlab_mcp"
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  publish-alpine:
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+    with:
+      context: .
+      dockerfile: Dockerfile.alpine
+      image_name: gitlab-mcp
+      dockerhub_image: pirlruc/gitlab-mcp
+      platforms: linux/amd64,linux/arm64
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      tag_suffix: -alpine
+      tag_alias_unsuffixed: false
+      tag_latest: true
+      sign: true
+      blocking: true
+      dhi_login: true
+      environment: release
+      structure_test_config: container-structure-test.yml
+      verify_command: /app/.venv/bin/python -c "import gitlab_mcp"
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  digests:
+    needs: [github-release, publish-debian, publish-alpine]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - name: Checkout digest script
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          ref: 0e78652fa9f65b9d98033ac82bf9e5308ebb17a7
+          persist-credentials: false
+          sparse-checkout: scripts/append-release-digests.sh
+          sparse-checkout-cone-mode: false
+      - name: Append digest table
+        env:
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          GHCR_USER: ${{ github.actor }}
+        run: |
+          set -eu
+          owner="${REPO%%/*}"
+          sh scripts/append-release-digests.sh \
+            "ghcr.io/${owner}/gitlab-mcp:latest" \
+            "ghcr.io/${owner}/gitlab-mcp:latest-alpine"

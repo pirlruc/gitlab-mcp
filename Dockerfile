@@ -2,7 +2,7 @@
 # dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003)
 # Refresh digests: docker login dhi.io && bash scripts/pin-dhi-digests.sh
 FROM dhi.io/python:3.13-debian13-dev@sha256:f2f9ec95d8c2478ea8c8f4f4ada7678451d4d4859d4562ad572513369cede5fc AS builder
-COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 /uv /uvx /bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \

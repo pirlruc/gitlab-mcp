@@ -1,5 +1,3 @@
----
-# Thin caller — pinned to containerdevops@4185836 (checkout_token + scripts_ref + pkg_types).
 name: Container
 
 on:
@@ -7,66 +5,123 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    - cron: "0 7 * * 1"
   workflow_dispatch:
     inputs:
       blocking:
         description: Fail the job on gate errors
         type: boolean
-        default: false
+        default: true
 
-permissions:
-  contents: read
-  security-events: write
+permissions: {}
 
 jobs:
   lint:
-    # Fork PRs lack secrets; Dependabot PRs cannot use Actions secrets for private
-    # reusable workflows (containerdevops).
-    if: >-
-      github.actor != 'dependabot[bot]' &&
-      (github.event_name != 'pull_request' ||
-       github.event.pull_request.head.repo.full_name == github.repository)
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event_name != 'schedule'
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
     with:
-      dockerfile: Dockerfile
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
-      # Push/PR to main: blocking. Manual dispatch: respect the input.
-      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-    secrets:
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+      dockerfiles: |
+        Dockerfile
+        Dockerfile.alpine
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      blocking: true
 
-  build:
+  build-debian:
     needs: lint
-    if: >-
-      github.actor != 'dependabot[bot]' &&
-      (github.event_name != 'pull_request' ||
-       github.event.pull_request.head.repo.full_name == github.repository)
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event_name != 'schedule'
+    permissions:
+      contents: read
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
     with:
       context: .
       dockerfile: Dockerfile
       image_name: gitlab-mcp:ci
+      artifact_name: gitlab-mcp-debian
+      handoff_package: gitlab-mcp
       structure_test_config: container-structure-test.yml
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
-      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      blocking: true
       dhi_login: true
+      pkg_types: library
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
-  scan:
-    needs: build
-    if: >-
-      github.actor != 'dependabot[bot]' &&
-      (github.event_name != 'pull_request' ||
-       github.event.pull_request.head.repo.full_name == github.repository)
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+  build-alpine:
+    needs: lint
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event_name != 'schedule'
+    permissions:
+      contents: read
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
     with:
-      image: gitlab-mcp:ci
-      image_artifact: container-image
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      context: .
+      dockerfile: Dockerfile.alpine
+      image_name: gitlab-mcp:ci-alpine
+      artifact_name: gitlab-mcp-alpine
+      handoff_package: gitlab-mcp
+      structure_test_config: container-structure-test.yml
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      blocking: true
+      dhi_login: true
       pkg_types: library
-      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  scan-debian:
+    needs: build-debian
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event_name != 'schedule'
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+    with:
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-debian.outputs.handoff_package, needs.build-debian.outputs.digest) }}
+      scanners: vuln,secret
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      pkg_types: library
+      results_artifact: scan-debian
+      sarif_category: trivy-debian
+      blocking: true
+
+  scan-alpine:
+    needs: build-alpine
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event_name != 'schedule'
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+    with:
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
+      scanners: vuln,secret
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      pkg_types: library
+      results_artifact: scan-alpine
+      sarif_category: trivy-alpine
+      blocking: true
+
+  rescan:
+    if: github.event_name == 'schedule'
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+    with:
+      image: ghcr.io/pirlruc/gitlab-mcp:latest
+      scripts_ref: 1098e68cb5f8bfb3c38f8b227ca215b260ed29fe
+      pkg_types: os,library
+      results_artifact: rescan-debian
+      sarif_category: trivy-rescan-debian
+      blocking: false

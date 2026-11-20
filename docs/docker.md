@@ -63,7 +63,7 @@ Prefer pull-by-digest in deployments (`DOCKER-SEC-006`).
 |----------|----------|---------|
 | `GITLAB_URL` | yes | GitLab base URL |
 | `GITLAB_TOKEN` | one of token or file | Access token. `GITLAB_TOKEN_FILE` replaces it |
-| `GITLAB_READ_ONLY` | no | Omit write tools when `true` |
+| `GITLAB_READ_ONLY` | no | Default `true`. Set `0` to register write tools |
 | `GITLAB_DEFAULT_PROJECT` | no | Default project id/path |
 
 See [configuration.md](configuration.md) for the full table.

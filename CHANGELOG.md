@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-10-05
+## [0.2.0] - 2026-11-20
+
+### Changed
+
+- Read-only is the default. Set `GITLAB_READ_ONLY=0` to register write tools.
+- List tools report `truncated` and `next_page` instead of a silently cut list.
 
 ### Added
 
 - `MCP_TRANSPORT=streamable-http` on port 3333, with a file-backed bearer token, Host and Origin checks, `GITLAB_TOKEN_FILE`, and `GET /healthz`.
+- Read toolsets for core, repository, CI, issues, work items, search, and wikis. `GITLAB_TOOLSETS` limits which sets are registered.
+- `create_merge_request` when writes are enabled. Merge and close stay unavailable.
+- Alpine image `Dockerfile.alpine` published as the `-alpine` tags. Debian keeps the unsuffixed tags.
 - Initial MCP server scaffold with GitLab merge request read and safe-update tools.

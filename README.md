@@ -1,10 +1,11 @@
 # gitlab-mcp
 
 [MCP](https://modelcontextprotocol.io/) server for **self-hosted GitLab**
-merge requests: list, search, and read MRs plus safe updates (thread replies,
-description/labels). Creating, merging, and closing MRs is intentionally
-unavailable — verified against GitLab CE **18.11.11** (self-hosted Free; no
-built-in MCP server). The client is `/api/v4` generic and is not version-gated.
+merge requests and the read-only core, repository, and CI toolsets.
+Writes (thread replies, issue creation, `create_merge_request`) stay off unless
+`GITLAB_READ_ONLY=0`. Merging and closing merge requests stay unavailable.
+Verified against GitLab CE **18.11** (self-hosted Free; no built-in MCP server).
+The client is `/api/v4` and is not version-gated.
 
 **Repository:** [pirlruc/gitlab-mcp](https://github.com/pirlruc/gitlab-mcp)
 
@@ -15,8 +16,12 @@ built-in MCP server). The client is `/api/v4` generic and is not version-gated.
 | `list_merge_requests` / `search_merge_requests` / `get_merge_request` | Read |
 | Diffs, commits, diff versions | Read |
 | Discussions, pipelines, approvals, participants, reviewers | Read |
-| Create / reply / resolve discussion threads | Write (optional) |
-| Update title, description, labels, milestone | Write (optional) |
+| Create / reply / resolve discussion threads | Write (`GITLAB_READ_ONLY=0`) |
+| Update title, description, labels, milestone | Write (`GITLAB_READ_ONLY=0`) |
+| `create_merge_request` | Write (`GITLAB_READ_ONLY=0`) |
+| Projects, groups, users, milestones, todos | Read (`core`) |
+| Branches, files, commits, tags, releases | Read (`repository`) |
+| Pipelines, jobs, capped logs, artifacts | Read (`ci`) |
 
 ## Quick start
 
@@ -52,7 +57,7 @@ See [docs/configuration.md](docs/configuration.md) and [docs/tools.md](docs/tool
 
 ## Quality gates
 
-Org floors from [`docs/guardrails/python/profile.thresholds.yml`](https://github.com/pirlruc/guardrails/blob/main/python/profile.thresholds.yml):
+Org floors from [`docs/guardrails/python/profile.thresholds.yml`](https://github.com/pirlruc/guardrails/blob/1.15.0/python/profile.thresholds.yml):
 
 - Cyclomatic complexity: max ≤ 8, average ≤ 5
 - Maintainability index: min ≥ 40, average ≥ 60

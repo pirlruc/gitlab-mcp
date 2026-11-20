@@ -10,12 +10,12 @@
 | Read tools (GLMCP-004/005) | Done |
 | Write tools (GLMCP-006/007) | Done |
 | Docs / release (GLMCP-008) | Done |
-| Container image (GLMCP-009) | In progress — DHI Python base; pin digests after `docker login dhi.io` |
-| Guardrails realign (GLMCP-010) | In progress — MI avg 60; note/rule removed |
-| Supply-chain parity (GLMCP-011) | Open — wheel/sdist SBOM + provenance vs container |
-| Dependabot Insights (GLMCP-012) | Done — multi-ecosystem `all-dependencies` PR #62 merged; registries + PAT access working |
-| Official MCP parity (GLMCP-014…021) | Open — authored from GitLab MCP tools docs; not implemented yet |
-| Streamable HTTP (GLMCP-022) | Implemented on `feature-gitlab-mcp-http` — bearer file, Host/Origin checks, `/healthz`. Release `0.2.0` after merge. Image publish still needs `docker login dhi.io` |
+| Container image (GLMCP-009, GLMCP-029) | Done on `feature-gitlab-mcp-wave` — Debian and Alpine DHI images. Debian owns unsuffixed tags |
+| Guardrails realign (GLMCP-010, GLMCP-028) | Done — guardrails 1.15.0, scaffold 1.12.0, deviations empty |
+| Supply-chain parity (GLMCP-011) | Done — wheel SBOM via pydevops `python-release` |
+| Dependabot Insights (GLMCP-012) | Done — plus `gitsubmodule`, cooldown, and security groups |
+| Official MCP parity (GLMCP-014…020, 023…026) | Done — read toolsets. GLMCP-021 rejected (paid tiers) |
+| Streamable HTTP (GLMCP-022) | Done — bearer file, Host/Origin checks, `/healthz`. Release `0.2.0` |
 
 ## Commands
 
@@ -33,14 +33,14 @@ docker buildx build --load -t gitlab-mcp:local .
 ## Key paths
 
 - `src/gitlab_mcp/server.py` — MCP stdio entry (`MCPServer` from mcp v2)
-- `Dockerfile` — multi-stage DHI `dhi.io/python:3.13-debian13(-dev)`
+- `Dockerfile` / `Dockerfile.alpine` — DHI Debian 13 and Alpine 3.24, digest pinned
 - `scripts/pin-dhi-digests.sh` — refresh base digests after login
-- `docs/docker-hub.md` — Hub Overview: pull, run, env vars, Cursor config
+- `docs/docker-hub.md` / `docs/github-packages.md` — Hub and GHCR pages. `0.1.0` index `sha256:9df623d5…`
 - `docs/docker.md` — maintainer build/hardening, DHI, registry coordinates
 - `scripts/quality_gates.py` — radon CC/MI gates
 - `docs/issues.yml` — authored backlog (GLMCP-001…021); 001–008 marked `done`
-- `docs/guardrails/` — submodule @ guardrails tag `1.4.0`
-- `.github/scaffold/` — submodule @ github-scaffold tag `1.3.0`
+- `docs/guardrails/` — submodule @ guardrails tag `1.15.0`
+- `.github/scaffold/` — submodule @ github-scaffold tag `1.12.0`
 - `.github/dependabot.yml` — multi-ecosystem `all-dependencies` group, monthly (SC-DEP-*)
 
 ## Known pitfalls
@@ -49,7 +49,8 @@ docker buildx build --load -t gitlab-mcp:local .
 - System Python may be 3.14 without `python3-venv`; uv manages 3.13.
 - `requires-python` is `>=3.13,<3.15` so the lock resolves only for supported CPythons.
 - MCP SDK v2: `FastMCP` → `MCPServer` (`mcp.server.mcpserver`).
-- `GITLAB_READ_ONLY=1` omits write tools from `tools/list`.
+- `GITLAB_READ_ONLY` defaults to true. Set `GITLAB_READ_ONLY=0` to register writes.
+- `GITLAB_TOOLSETS` limits registration (`all` or a comma-separated list).
 - After scaffold bump, `sync-templates.sh` **seeds** `.github/dependabot.yml` once and does
   not overwrite it — the multi-ecosystem config is safe across syncs.
 - DHI pulls need `docker login dhi.io` locally and Hub secrets in CI
@@ -87,9 +88,9 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Close [GLMCP-012](https://github.com/pirlruc/gitlab-mcp/issues/38) as done (Insights confirmed via PR #62).
-2. Implement Phase 6 starting with [GLMCP-014](https://github.com/pirlruc/gitlab-mcp/issues/42).
-3. Decide [GLMCP-020](https://github.com/pirlruc/gitlab-mcp/issues/58); then GLMCP-011.
+1. Confirm the `v0.2.0` Release lists both image digests and that Hub has `-alpine` tags.
+2. Restrict the `release` GitHub Environment to tag pushes.
+3. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
 
 ## Recent history
 
@@ -114,4 +115,4 @@ docker buildx build --load -t gitlab-mcp:local .
   and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
-*Last updated: 2026-10-05 (GLMCP-022 streamable HTTP)*
+*Last updated: 2026-11-20 (guardrails 1.15.0, Alpine image, read toolsets)*

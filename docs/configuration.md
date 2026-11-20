@@ -7,7 +7,9 @@ All settings are environment variables (never CLI flags for secrets).
 | `GITLAB_URL` | yes | — | Base URL of the GitLab instance (e.g. `https://gitlab.example.com`) |
 | `GITLAB_TOKEN` | one of token or file | — | Personal/project access token (`read_api` for read-only; `api` for writes) |
 | `GITLAB_TOKEN_FILE` | one of token or file | — | File containing the GitLab token. When set, it replaces `GITLAB_TOKEN` |
-| `GITLAB_READ_ONLY` | no | `false` | When `true`/`1`, write tools are not registered |
+| `GITLAB_READ_ONLY` | no | `true` | Set `0` to register write tools. The default is read-only |
+| `GITLAB_TOOLSETS` | no | `all` | Comma-separated toolsets, or `all` |
+| `GITLAB_MAX_RESPONSE_BYTES` | no | `1048576` | Maximum JSON body. Job logs are capped at 512000 bytes |
 | `MCP_TRANSPORT` | no | `stdio` | `stdio` or `streamable-http`. SSE is not supported |
 | `MCP_HTTP_HOST` | no | `127.0.0.1` | Bind address for streamable HTTP |
 | `MCP_HTTP_PORT` | no | `3333` | Bind port for streamable HTTP |
