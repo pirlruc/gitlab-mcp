@@ -10,10 +10,10 @@ Production OCI image for the stdio MCP server. Principles:
 The image uses free **Docker Hardened Images** Community bases from `dhi.io`
 (Apache 2.0 — not a timed trial; Select/Enterprise are optional paid SLAs only):
 
-| Stage | Tag |
-|-------|-----|
-| Builder | `dhi.io/python:3.13-debian13-dev` |
-| Runtime | `dhi.io/python:3.13-debian13` |
+| Stage | Debian | Alpine |
+|-------|--------|--------|
+| Builder | `dhi.io/python:3.13-debian13-dev` | `dhi.io/python:3.13-alpine3.24-dev` |
+| Runtime | `dhi.io/python:3.13-debian13` | `dhi.io/python:3.13-alpine3.24` |
 
 Debian (glibc) keeps wheels aligned with the previous slim-bookworm stack. Runtime
 is minimal (no shell / package manager) and runs as `65532:65532`. Do **not**
@@ -30,30 +30,25 @@ bash scripts/pin-dhi-digests.sh
 
 CI: set repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (Hub PAT
 with read). The containerdevops build/publish workflows log in to `dhi.io` with
-those secrets before Buildx.
+those secrets before Buildx. `pirlruc/containerdevops` is public, so the caller
+does not pass a checkout token.
 
-Also set `CONTAINERDEVOPS_READ_TOKEN`: a fine-grained PAT (or classic) with
-`contents:read` on private `pirlruc/containerdevops`. Caller `GITHUB_TOKEN`
-cannot sparse-checkout that repo; without this secret Container CI fails at
-checkout with REST `Not Found`.
+`DOCKERHUB_DESCRIPTION_TOKEN` (Read, Write, and Delete) is what publishes
+[docker-hub.md](docker-hub.md) as the Hub Overview. The image-pull token cannot
+call that API.
 
 ### Scanning notes
 
-Docker Scout (uses DHI attestations / OpenVEX) reports **0** CRITICAL/HIGH on the
-built image. Raw Trivy without VEX may still list unfixed Debian package CVEs
-(especially `linux-libc-dev`); prefer Scout or Trivy with VEX / `--ignore-unfixed`
-when gating publish, and keep app-library scans (`--pkg-types library`) clean.
-
-CI uses `pkg_types: library` on the Container scan job (workflow input) and root
-`trivy.yaml` (`vulnerability.ignore-unfixed: true`) so the blocking scan matches
-that policy.
+The blocking scan is `pkg_types: library`. A full OS scan of the Debian base
+still reports fixed OpenSSL findings, so the weekly rescan keeps `os,library`
+and is non-blocking. Root `trivy.yaml` sets `vulnerability.ignore-unfixed: true`.
 
 ## Registries
 
 | Registry | Image |
 |----------|-------|
-| GHCR | `ghcr.io/pirlruc/gitlab-mcp` |
-| Docker Hub | `pirlruc/gitlab-mcp` (when credentials are configured) |
+| GHCR | `ghcr.io/pirlruc/gitlab-mcp` (private; login required) |
+| Docker Hub | `pirlruc/gitlab-mcp` |
 
 Prefer pull-by-digest in deployments (`DOCKER-SEC-006`).
 
@@ -90,7 +85,7 @@ docker run --rm \
   -v /path/gitlab-token:/run/secrets/gitlab:ro \
   -v /path/mcp-token:/run/secrets/mcp:ro \
   -p 127.0.0.1:3333:3333 \
-  ghcr.io/pirlruc/gitlab-mcp:0.2.0
+  ghcr.io/pirlruc/gitlab-mcp:0.2.4
 ```
 
 Stdio (no published port):
@@ -133,11 +128,8 @@ docker run --rm -i \
 
 ## Signing and provenance
 
-While this repository is **private** on a non–Enterprise Cloud plan, image
-signing (`DOCKER-SEC-003`) and SLSA provenance (`DOCKER-SEC-004`) are deferred.
-See `docs/guardrail-deviations.yml`. The publish workflow enables both when
-`sign: true` (intended once the repo is public). SBOM artifacts are still
-produced by the scan workflow.
+`v0.2.4` is signed. The publish job sets `sign: true`. Verify with the command
+in [docker-hub.md](docker-hub.md). `docs/guardrail-deviations.yml` is empty.
 
 ## Local build
 
@@ -145,5 +137,6 @@ produced by the scan workflow.
 docker login dhi.io
 bash scripts/pin-dhi-digests.sh   # digest-pin FROM lines
 docker buildx build --load -t gitlab-mcp:local .
+docker buildx build --load -f Dockerfile.alpine -t gitlab-mcp:alpine-local .
 container-structure-test test --image gitlab-mcp:local --config container-structure-test.yml
 ```

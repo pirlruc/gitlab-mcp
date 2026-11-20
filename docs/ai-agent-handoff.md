@@ -35,7 +35,7 @@ docker buildx build --load -t gitlab-mcp:local .
 - `src/gitlab_mcp/server.py` — MCP stdio entry (`MCPServer` from mcp v2)
 - `Dockerfile` / `Dockerfile.alpine` — DHI Debian 13 and Alpine 3.24, digest pinned
 - `scripts/pin-dhi-digests.sh` — refresh base digests after login
-- `docs/docker-hub.md` / `docs/github-packages.md` — Hub and GHCR pages. `0.1.0` index `sha256:9df623d5…`
+- `docs/docker-hub.md` / `docs/github-packages.md` — Hub and GHCR pages. Signed `0.2.4` Debian index `sha256:527454bc…`, Alpine `sha256:569c3aab…`
 - `docs/docker.md` — maintainer build/hardening, DHI, registry coordinates
 - `scripts/quality_gates.py` — radon CC/MI gates
 - `docs/issues.yml` — authored backlog (GLMCP-001…021); 001–008 marked `done`
@@ -88,13 +88,17 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Confirm Hub has the `v0.2.4` and `-alpine` tags. `v0.2.2` and `v0.2.3` were pushed and then failed before signing.
-2. Restrict the `release` GitHub Environment to tag pushes.
-3. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
-4. Add this repository to the Actions access list for `ci-python`. `ci-lint` works. `python-quality` still cannot pull `ci-python` (`manifest unknown` for `sha256:9fd566c89c4d…` and for the 3.6.0 digest).
+1. Add `DOCKERHUB_DESCRIPTION_TOKEN` (Read, Write, Delete). Hub tags for `0.2.4` exist; the live Overview is still the `0.1.0` page because that secret is unset.
+2. Make the GHCR package `gitlab-mcp` public if anonymous pulls should work. Anonymous `GET` of `0.2.4` returns 401. Docker Hub is public.
+3. Restrict the `release` GitHub Environment to tag pushes.
+4. Add this repository to the Actions access list for `ci-python`. `ci-lint` works. `python-quality` still cannot pull `ci-python`.
 
 ## Recent history
 
+- 2026-11-20: Public image pages name signed `0.2.4` (Debian index
+  `sha256:527454bc…`, Alpine `sha256:569c3aab…`). Hub Overview stays on
+  the old page until `DOCKERHUB_DESCRIPTION_TOKEN` exists. GHCR
+  anonymous pull returns 401.
 - 2026-11-20: Container lint runs the nested infra and secrets jobs
   again (`ci-lint` is reachable). Quality stays on the host because
   `ci-python` still returns manifest unknown to Actions. Secret scanning,
