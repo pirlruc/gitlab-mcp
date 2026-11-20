@@ -856,8 +856,8 @@ milestones:
             - README.md
         acceptance_criteria:
           - Epic body states the chosen path (implement or permanent block)
-          - If implement: tool matches official params; merge/close remain unavailable
-          - If block: docs/tools.md lists create_merge_request under Explicitly unavailable with rationale
+          - "If implement: tool matches official params; merge/close remain unavailable"
+          - "If block: docs/tools.md lists create_merge_request under Explicitly unavailable with rationale"
           - README Features table updated to match the decision
         guardrail_refs:
           - PY-SEC-002
