@@ -91,9 +91,15 @@ docker buildx build --load -t gitlab-mcp:local .
 1. Confirm Hub has the `v0.2.4` and `-alpine` tags. `v0.2.2` and `v0.2.3` were pushed and then failed before signing.
 2. Restrict the `release` GitHub Environment to tag pushes.
 3. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
+4. Add this repository to the Actions access list for `ci-python`. `ci-lint` works. `python-quality` still cannot pull `ci-python` (`manifest unknown` for `sha256:9fd566c89c4d…` and for the 3.6.0 digest).
 
 ## Recent history
 
+- 2026-11-20: Container lint runs the nested infra and secrets jobs
+  again (`ci-lint` is reachable). Quality stays on the host because
+  `ci-python` still returns manifest unknown to Actions. Secret scanning,
+  push protection, private vulnerability reporting, and CodeQL default
+  setup (Python and Actions) are enabled.
 - 2026-10-05: GLMCP-022 streamable HTTP. `uv audit` still reports PyJWT and
   virtualenv findings that this change did not introduce. Do not treat that
   failure as a regression of the HTTP work.
@@ -115,4 +121,4 @@ docker buildx build --load -t gitlab-mcp:local .
   and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
-*Last updated: 2026-11-20 (v0.2.4 signed publish)*
+*Last updated: 2026-11-20 (ci-lint access, CodeQL, secret scanning)*
