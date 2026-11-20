@@ -15,7 +15,7 @@
 | Supply-chain parity (GLMCP-011) | Done — wheel SBOM via pydevops `python-release` |
 | Dependabot Insights (GLMCP-012) | Done — plus `gitsubmodule`, cooldown, and security groups |
 | Official MCP parity (GLMCP-014…020, 023…026) | Done — read toolsets. GLMCP-021 rejected (paid tiers) |
-| Streamable HTTP (GLMCP-022) | Done. Image tags start at `v0.2.3`. `v0.2.0` failed smoke, `v0.2.1` failed the arm64 pull, `v0.2.2` pushed then failed the arm64 structure test before signing |
+| Streamable HTTP (GLMCP-022) | Done. Signed images are `v0.2.4`. Earlier tags failed publish verification after or before the push |
 
 ## Commands
 
@@ -88,7 +88,7 @@ docker buildx build --load -t gitlab-mcp:local .
 
 ## Suggested next work
 
-1. Confirm the `v0.2.0` Release lists both image digests and that Hub has `-alpine` tags.
+1. Confirm Hub has the `v0.2.4` and `-alpine` tags. `v0.2.2` and `v0.2.3` were pushed and then failed before signing.
 2. Restrict the `release` GitHub Environment to tag pushes.
 3. `common-release-digests.yml` checks out the caller and reads `github.event.release`. This repo runs the script from a checkout of commondevops on a tag push instead.
 
@@ -115,4 +115,4 @@ docker buildx build --load -t gitlab-mcp:local .
   and `.github/scaffold` to [github-scaffold 1.3.0](https://github.com/pirlruc/github-scaffold/releases/tag/1.3.0);
   synced templates/rules; added `docs/continuous-improvement.md`. Methodology headers pin `1.3.0`.
 
-*Last updated: 2026-11-20 (v0.2.2 publish pin, issues synced)*
+*Last updated: 2026-11-20 (v0.2.4 signed publish)*
