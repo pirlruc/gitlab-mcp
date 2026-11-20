@@ -70,10 +70,18 @@ bash scripts/check-ci-local.sh
 
 ## Container image
 
-See [docs/docker-hub.md](docs/docker-hub.md) for pull/run/env (Hub Overview) and
-[docs/docker.md](docs/docker.md) for maintainer build notes. Build locally with
-`docker buildx build --load -t gitlab-mcp:local .`.
-Published images: `ghcr.io/pirlruc/gitlab-mcp` and (when configured) `pirlruc/gitlab-mcp` on Docker Hub.
+Pull the signed `0.2.4` image. Debian owns the unsuffixed tags. Alpine is
+`-alpine`.
+
+```bash
+docker pull pirlruc/gitlab-mcp:0.2.4
+docker pull pirlruc/gitlab-mcp:0.2.4-alpine
+```
+
+Run, environment, and digests: [docs/docker-hub.md](docs/docker-hub.md).
+The same tags on GHCR require a login: [docs/github-packages.md](docs/github-packages.md).
+Maintainer build notes: [docs/docker.md](docs/docker.md).
+
 ## Releases (local Commitizen)
 
 1. `uv sync --frozen --extra dev`

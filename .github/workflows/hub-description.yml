@@ -1,0 +1,27 @@
+# Push the Docker Hub Overview without rebuilding the image.
+# DOCKERHUB_DESCRIPTION_TOKEN needs Read, Write, and Delete on Docker Hub.
+
+name: Hub description
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/docker-hub.md"
+      - ".github/workflows/hub-description.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  overview:
+    permissions:
+      contents: read
+    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@781763ef7a4e67850f8cce78f4663c2823e43e18
+    with:
+      dockerhub_image: pirlruc/gitlab-mcp
+      dockerhub_readme: docs/docker-hub.md
+      dockerhub_short_description: MCP server for self-hosted GitLab merge requests
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_DESCRIPTION_TOKEN: ${{ secrets.DOCKERHUB_DESCRIPTION_TOKEN }}
