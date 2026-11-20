@@ -23,14 +23,14 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@0274fd4600e1a793d694a2a882d96a14a6a18d2a
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
     with:
       context: .
       dockerfile: Dockerfile
       image_name: gitlab-mcp
       dockerhub_image: pirlruc/gitlab-mcp
       platforms: linux/amd64,linux/arm64
-      scripts_ref: 0274fd4600e1a793d694a2a882d96a14a6a18d2a
+      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
       tag_suffix: -debian
       tag_alias_unsuffixed: true
       tag_latest: true
@@ -52,14 +52,14 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@0274fd4600e1a793d694a2a882d96a14a6a18d2a
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
     with:
       context: .
       dockerfile: Dockerfile.alpine
       image_name: gitlab-mcp
       dockerhub_image: pirlruc/gitlab-mcp
       platforms: linux/amd64,linux/arm64
-      scripts_ref: 0274fd4600e1a793d694a2a882d96a14a6a18d2a
+      scripts_ref: 25232eb34a7073e215edc5ca8ef8ee9b8dd9b9d4
       tag_suffix: -alpine
       tag_alias_unsuffixed: false
       tag_latest: true
